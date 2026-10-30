@@ -110,6 +110,26 @@ button{font:inherit;color:inherit;cursor:pointer}
 .btns{border:1px solid var(--line);color:var(--ink)}
 .repf .hint{margin:0;font-size:13px;color:var(--muted)}
 .repf .err{margin:0;color:#b3261e;font-weight:700}
+.mode{display:grid;grid-template-columns:1fr 1fr;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--paper)}
+.mode button{border:0;background:none;padding:9px;font-weight:700;font-size:15px;min-height:42px}
+.mode button+button{border-left:1px solid var(--line)}
+.mode button[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
+.calh,.calr{display:grid;grid-template-columns:26px repeat(5,minmax(0,1fr));gap:4px}
+.calh span{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);text-align:center}
+.calw{display:flex;align-items:flex-start;justify-content:center;padding-top:6px;font-size:11px;color:var(--muted)}
+.calc{border:1px solid var(--line);background:var(--paper);border-radius:7px;padding:4px;min-height:74px;display:flex;flex-direction:column;align-items:stretch;gap:3px;text-align:left;min-width:0;overflow:hidden}
+.calc.past{opacity:.55}
+.calc.today{border:2px solid var(--signal)}
+.calc.away{background:repeating-linear-gradient(135deg,color-mix(in srgb,#c0392b 10%,var(--paper)) 0 7px,var(--paper) 7px 14px)}
+.cd{display:flex;align-items:baseline;gap:3px;font-weight:700;font-size:14px}
+.cd small{font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase}
+.cj{display:block;font-size:10.5px;line-height:1.25;padding:1px 3px;border-radius:3px;background:color-mix(in srgb,var(--pc) 22%,var(--paper));border-left:3px solid var(--pc);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cm{font-size:10.5px;color:var(--muted);font-weight:600}
+.cab{font-size:10.5px;font-weight:700;color:#b3261e}
+@media (prefers-color-scheme:dark){.cab{color:#ff8a80}}
+.cdots{display:flex;flex-wrap:wrap;gap:3px}
+.cdots i{width:9px;height:9px;border-radius:50%;background:var(--cc);display:block}
+.hint2{margin:0;font-size:13px;color:var(--muted)}
 .install button{align-self:flex-end;border:0;background:none;color:var(--muted);font-size:13px;padding:2px 0}
 </style>
 </head>
@@ -135,8 +155,8 @@ function set(k,v){try{v==null?localStorage.removeItem(k):localStorage.setItem(k,
 
 var now=new Date(),TODAY=iso(now);
 var base=monday(now);if(now.getDay()===6||now.getDay()===0)base=add(base,7);
-var weeks=[0,1,2,3].map(function(i){return add(base,7*i)});
-var S={w:0,day:null,me:get("gb-me")||"",all:get("gb-all")==="1"};
+var weeks=[0,1,2,3,4,5].map(function(i){return add(base,7*i)});
+var S={w:0,day:null,me:get("gb-me")||"",all:get("gb-all")==="1",cal:get("gb-cal")==="1"};
 (function(){var di=(now.getDay()+6)%7;S.day=(now.getDay()===6||now.getDay()===0)?iso(base):(di<5?TODAY:iso(base))})();
 
 function pIdx(n){n=(n||"").trim();if(!n)return -1;var f=D.farger||{};if(f[n]!=null)return f[n]%12;var i=D.ansatte.indexOf(n);return i>=0?i%12:-1}
@@ -149,6 +169,29 @@ function tasksOn(day){return D.oppgaver.filter(function(t){return t.dato===day})
 
 function setUpd(){var u=new Date(D.oppdatert);document.getElementById("upd").textContent="Oppdatert "+DAYS[(u.getDay()+6)%7].toLowerCase()+" "+short(u)+" kl. "+pad(u.getHours())+":"+pad(u.getMinutes())}
 
+function renderCal(app){
+  var head=el("div","calh");head.appendChild(el("span"));["Man","Tir","Ons","Tor","Fre"].forEach(function(d){head.appendChild(el("span",null,d))});app.appendChild(head);
+  weeks.forEach(function(ws,wi){
+    var row=el("div","calr");var wl=el("span","calw");wl.appendChild(el("b",null,String(wk(ws))));row.appendChild(wl);
+    [0,1,2,3,4].forEach(function(i){var d=add(ws,i),di=iso(d);
+      var ts=tasksOn(di).filter(mine);var aw=awayOn(di);var meAway=S.me&&aw.some(function(f){return f.hvem===S.me});
+      var c=el("button","calc"+(di===TODAY?" today":"")+(di<TODAY?" past":"")+(meAway?" away":""));c.type="button";
+      c.setAttribute("aria-label",DAYS[(d.getDay()+6)%7]+" "+short(d)+": "+ts.length+" jobber");
+      var top=el("span","cd");top.appendChild(el("span",null,String(d.getDate())));if(d.getDate()===1||(wi===0&&i===0))top.appendChild(el("small",null,MON[d.getMonth()]));c.appendChild(top);
+      if(meAway){c.appendChild(el("span","cab",(aw.filter(function(f){return f.hvem===S.me})[0].type)||"Borte"))}
+      else if(S.me){ts.slice(0,3).forEach(function(t){var o=order(t.ordreId);var x=el("span","cj",(o&&o.nr?o.nr+" ":"")+(t.tekst||(o&&o.navn)||"Jobb"));x.style.setProperty("--pc",pv(pIdx(S.me)));c.appendChild(x)});
+        if(ts.length>3)c.appendChild(el("span","cm","+"+(ts.length-3)))}
+      else{var dots=el("span","cdots");var who=[];ts.forEach(function(t){names(t).forEach(function(n){if(who.indexOf(n)<0)who.push(n)})});
+        who.slice(0,9).forEach(function(n){var dt=el("i");dt.style.setProperty("--cc",pv(pIdx(n)));dt.title=n;dots.appendChild(dt)});c.appendChild(dots);
+        if(ts.length)c.appendChild(el("span","cm",ts.length+(ts.length===1?" jobb":" jobber")));
+        if(aw.length)c.appendChild(el("span","cab",aw.length+" borte"))}
+      c.onclick=function(){S.cal=false;set("gb-cal",null);S.w=wi;S.day=di;render();window.scrollTo(0,0)};
+      row.appendChild(c)});
+    app.appendChild(row);
+    var note=(D.uker[wkey(ws)]||{}).tekst;if(note&&wi>0){}
+  });
+  app.appendChild(el("p","hint2",S.me?"Viser jobbene til "+S.me+". Trykk på en dag for detaljer.":"Prikkene viser hvem som har jobber. Trykk på en dag for detaljer."));
+}
 function render(){
   var app=document.getElementById("app");app.innerHTML="";
   var ws=weeks[S.w],days=[0,1,2,3,4].map(function(i){return add(ws,i)});
@@ -165,6 +208,10 @@ function render(){
     box.appendChild(row);app.appendChild(box);
   }
 
+  // visning
+  var mode=el("div","mode");[["Dag",false],["Kalender",true]].forEach(function(m){var b=el("button",null,m[0]);b.type="button";b.setAttribute("aria-pressed",String(S.cal===m[1]));
+    b.onclick=function(){S.cal=m[1];set("gb-cal",m[1]?"1":null);render();window.scrollTo(0,0)};mode.appendChild(b)});app.appendChild(mode);
+  if(S.cal){renderCal(app)}else{
   // uke
   var nav=el("div","weeknav");var pv_=el("button",null,"‹");pv_.type="button";pv_.setAttribute("aria-label","Forrige uke");pv_.disabled=S.w===0;
   pv_.onclick=function(){S.w--;S.day=iso(weeks[S.w]);render()};
@@ -210,6 +257,7 @@ function render(){
     app.appendChild(g)});
   if(S.me&&all.length&&all.length!==all.filter(mine).length){var tg=el("button","toggle",S.all?"Vis bare mine jobber":"Vis hele verkstedet");tg.type="button";tg.onclick=function(){S.all=!S.all;set("gb-all",S.all?"1":null);render()};app.appendChild(tg)}
 
+  }
   var mb=el("button","report","Meld fravær");mb.type="button";mb.onclick=function(){S.rep=!S.rep;render();if(S.rep)setTimeout(function(){var e=document.getElementById("rep");if(e)e.scrollIntoView({behavior:"smooth",block:"start"})},30)};app.appendChild(mb);
   if(S.rep)app.appendChild(reportForm());
   var lev=D.ordre.filter(function(o){return o.levering}).sort(function(a,b){return a.levering<b.levering?-1:1});

@@ -31,7 +31,7 @@ oslo = ZoneInfo("Europe/Oslo")
 now = datetime.datetime.now(oslo)
 monday = (now - datetime.timedelta(days=now.weekday())).date()
 first = monday - datetime.timedelta(days=7)
-last = monday + datetime.timedelta(days=35)
+last = monday + datetime.timedelta(days=49)
 
 st = (oppsett.get("stasjoner") or {}).get("liste") or []
 ans = oppsett.get("ansatte") or {}
