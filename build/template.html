@@ -82,16 +82,41 @@ button{font:inherit;color:inherit;cursor:pointer}
 .foot{font-size:12.5px;color:var(--muted);text-align:center}
 .install{background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:12px 14px;font-size:14.5px;display:flex;flex-direction:column;gap:6px}
 .install b{font-size:15px}
+.login{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:20px 18px;display:flex;flex-direction:column;gap:12px;margin-top:10px}
+.login h2{margin:0;font-family:var(--display);font-size:28px}
+.login p{margin:0;color:var(--muted)}
+.login .err{color:#b3261e;font-weight:700}
+@media (prefers-color-scheme:dark){.login .err{color:#ff8a80}}
+.login input{border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:8px;padding:12px;font:inherit;font-size:20px;letter-spacing:.04em;min-height:50px;width:100%}
+.login button{border:0;background:var(--accent);color:var(--paper);border-radius:8px;padding:12px;font-weight:700;font-size:17px;min-height:50px}
+.login button[disabled]{opacity:.6}
+.link{border:0;background:none;color:var(--muted);text-decoration:underline;font-size:12.5px;padding:0}
+.awaybox{background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:10px 12px;display:flex;flex-direction:column;gap:6px}
+.awaybox h3{margin:0;font-size:13px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.awaybox .aw{font-size:14px;color:var(--muted);display:inline-flex;align-items:center;gap:4px}
+.report{align-self:stretch;border:1px solid var(--line);background:var(--paper);border-radius:8px;padding:12px;font-weight:700;font-size:16px;min-height:48px}
+.repf{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:16px;display:flex;flex-direction:column;gap:10px}
+.repf h2{margin:0;font-family:var(--display);font-size:24px}
+.fl{display:flex;flex-direction:column;gap:4px;min-width:0}
+.fl span{font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.fl select,.fl input{border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:8px;padding:10px;font:inherit;min-height:46px;width:100%}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.racts{display:flex;flex-direction:column;gap:8px;margin-top:4px}
+.btnp,.btns{display:block;text-align:center;text-decoration:none;border-radius:8px;padding:12px;font-weight:700;font-size:16px;min-height:48px}
+.btnp{background:var(--accent);color:var(--paper)}
+.btns{border:1px solid var(--line);color:var(--ink)}
+.repf .hint{margin:0;font-size:13px;color:var(--muted)}
+.repf .err{margin:0;color:#b3261e;font-weight:700}
 .install button{align-self:flex-end;border:0;background:none;color:var(--muted);font-size:13px;padding:2px 0}
 </style>
 </head>
 <body>
 <header class="top"><div class="row"><img src="icon-192.png" alt=""><div><h1>Arbeidsplan</h1><div class="sub" id="upd"></div></div></div></header>
-<main class="wrap" id="app"><div class="empty">Laster planen …</div></main>
+<main class="wrap" id="app"><div class="empty">Åpner planen …</div></main>
 <script id="data" type="application/json">__DATA__</script>
 <script>
 (function(){
-var D=JSON.parse(document.getElementById("data").textContent);
+var P=JSON.parse(document.getElementById("data").textContent),D=null;
 var DAYS=["Mandag","Tirsdag","Onsdag","Torsdag","Fredag","Lørdag","Søndag"],MON=["jan","feb","mar","apr","mai","jun","jul","aug","sep","okt","nov","des"];
 function pad(n){return String(n).padStart(2,"0")}
 function iso(d){return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate())}
@@ -109,7 +134,6 @@ var now=new Date(),TODAY=iso(now);
 var base=monday(now);if(now.getDay()===6||now.getDay()===0)base=add(base,7);
 var weeks=[0,1,2,3].map(function(i){return add(base,7*i)});
 var S={w:0,day:null,me:get("gb-me")||"",all:get("gb-all")==="1"};
-if(S.me&&D.ansatte.indexOf(S.me)<0)S.me="";
 (function(){var di=(now.getDay()+6)%7;S.day=(now.getDay()===6||now.getDay()===0)?iso(base):(di<5?TODAY:iso(base))})();
 
 function pIdx(n){n=(n||"").trim();if(!n)return -1;var f=D.farger||{};if(f[n]!=null)return f[n]%12;var i=D.ansatte.indexOf(n);return i>=0?i%12:-1}
@@ -117,9 +141,10 @@ function pv(i){return i<0?"var(--muted)":"var(--p"+i+")"}
 function names(t){return (t.hvem||"").split(",").map(function(x){return x.trim()}).filter(Boolean)}
 function order(id){for(var i=0;i<D.ordre.length;i++)if(D.ordre[i].id===id)return D.ordre[i];return null}
 function mine(t){return !S.me||names(t).indexOf(S.me)>=0}
+function awayOn(day){return (D.fravaer||[]).filter(function(f){return f.fra<=day&&(f.til||f.fra)>=day})}
 function tasksOn(day){return D.oppgaver.filter(function(t){return t.dato===day})}
 
-var u=new Date(D.oppdatert);document.getElementById("upd").textContent="Oppdatert "+DAYS[(u.getDay()+6)%7].toLowerCase()+" "+short(u)+" kl. "+pad(u.getHours())+":"+pad(u.getMinutes());
+function setUpd(){var u=new Date(D.oppdatert);document.getElementById("upd").textContent="Oppdatert "+DAYS[(u.getDay()+6)%7].toLowerCase()+" "+short(u)+" kl. "+pad(u.getHours())+":"+pad(u.getMinutes())}
 
 function render(){
   var app=document.getElementById("app");app.innerHTML="";
@@ -154,7 +179,10 @@ function render(){
   var note=(D.uker[wkey(ws)]||{}).tekst;
   if(note){var n=el("section","note");n.appendChild(el("h2",null,"Beskjed"));n.appendChild(el("p",null,note));app.appendChild(n)}
 
+  var aw=awayOn(S.day);
   var sd=parse(S.day);app.appendChild(el("h2","dayh",DAYS[(sd.getDay()+6)%7]+" "+short(sd)+(S.day===TODAY?" · i dag":"")));
+  if(aw.length){var ab=el("section","awaybox");ab.appendChild(el("h3",null,"Borte"));var al=el("div","w");
+    aw.forEach(function(f){var x=el("span","aw");var ch=el("span","chip",f.hvem);ch.style.setProperty("--cc",pv(pIdx(f.hvem)));x.appendChild(ch);x.appendChild(document.createTextNode(" "+(f.type||"Borte")));al.appendChild(x)});ab.appendChild(al);app.appendChild(ab)}
   var all=tasksOn(S.day);var show=S.me&&!S.all?all.filter(mine):all;
   if(!all.length){app.appendChild(el("div","empty","Ingenting planlagt denne dagen."))}
   else if(!show.length){app.appendChild(el("div","empty",S.me+" har ingen jobber denne dagen."))}
@@ -171,6 +199,8 @@ function render(){
     app.appendChild(g)});
   if(S.me&&all.length&&all.length!==all.filter(mine).length){var tg=el("button","toggle",S.all?"Vis bare mine jobber":"Vis hele verkstedet");tg.type="button";tg.onclick=function(){S.all=!S.all;set("gb-all",S.all?"1":null);render()};app.appendChild(tg)}
 
+  var mb=el("button","report","Meld fravær");mb.type="button";mb.onclick=function(){S.rep=!S.rep;render();if(S.rep)setTimeout(function(){var e=document.getElementById("rep");if(e)e.scrollIntoView({behavior:"smooth",block:"start"})},30)};app.appendChild(mb);
+  if(S.rep)app.appendChild(reportForm());
   var lev=D.ordre.filter(function(o){return o.levering}).sort(function(a,b){return a.levering<b.levering?-1:1});
   if(lev.length){app.appendChild(el("p","lbl","Kommende leveranser"));var L=el("section","lev");
     lev.forEach(function(o){var r=el("div");r.appendChild(el("span",null,(o.nr?o.nr+" · ":"")+(o.navn||"")+(o.hva?" – "+o.hva:"")));r.appendChild(el("span",null,short(parse(o.levering))));L.appendChild(r)});app.appendChild(L)}
@@ -181,9 +211,58 @@ function render(){
     ins.appendChild(el("span",null,ios?"Trykk Del-knappen i Safari (firkant med pil opp) og velg «Legg til på Hjem-skjerm».":"Trykk ⋮ øverst i Chrome og velg «Legg til på startskjermen» eller «Installer app»."));
     var x=el("button",null,"Skjul");x.type="button";x.onclick=function(){set("gb-noinst","1");render()};ins.appendChild(x);app.appendChild(ins)}
 
-  app.appendChild(el("p","foot","Grindberg Trevarefabrikk · Kilegrend"));
+  var ft=el("p","foot","Grindberg Trevarefabrikk · Kilegrend · ");var lo=el("button","link","Logg ut");lo.type="button";lo.onclick=logout;ft.appendChild(lo);app.appendChild(ft);
 }
-render();
+// ---------- fravær ----------
+var TYPER=["Syk","Egenmelding","Sykt barn","Ferie / fri","Lege / tannlege","Annet"];
+function reportForm(){
+  var f=el("form","repf");f.id="rep";f.appendChild(el("h2",null,"Meld fravær"));
+  function fld(lbl,inp){var w=el("label","fl");w.appendChild(el("span",null,lbl));w.appendChild(inp);return w}
+  var who=el("select");who.id="r-hvem";[""].concat(D.ansatte).forEach(function(n){var o=el("option",null,n||"Velg navn");o.value=n;if(n===S.me)o.selected=true;who.appendChild(o)});
+  var fra=el("input");fra.type="date";fra.id="r-fra";fra.value=S.day<TODAY?TODAY:S.day;
+  var til=el("input");til.type="date";til.id="r-til";til.value=fra.value;fra.onchange=function(){if(!til.value||til.value<fra.value)til.value=fra.value};
+  var typ=el("select");typ.id="r-type";TYPER.forEach(function(t){var o=el("option",null,t);o.value=t;typ.appendChild(o)});
+  var nt=el("input");nt.id="r-notat";nt.placeholder="Valgfritt";
+  f.appendChild(fld("Hvem",who));var row=el("div","two");row.appendChild(fld("Fra",fra));row.appendChild(fld("Til og med",til));f.appendChild(row);
+  f.appendChild(fld("Årsak",typ));f.appendChild(fld("Merknad",nt));
+  var msg=el("p","err");msg.hidden=true;f.appendChild(msg);
+  function text(){var a=parse(fra.value),b=parse(til.value||fra.value);var per=fra.value===til.value||!til.value?DAYS[(a.getDay()+6)%7].toLowerCase()+" "+short(a):short(a)+" – "+short(b);
+    return "Fravær: "+who.value+" – "+typ.value+" "+per+(nt.value.trim()?". "+nt.value.trim():"")}
+  function ok(){if(!who.value){msg.textContent="Velg navnet ditt.";msg.hidden=false;return false}if(!fra.value){msg.textContent="Velg dato.";msg.hidden=false;return false}msg.hidden=true;return true}
+  var acts=el("div","racts");
+  var sms=el("a","btnp","Send SMS til "+D.kontakt.navn);sms.href="#";sms.onclick=function(e){e.preventDefault();if(!ok())return;var sep=/iPhone|iPad|iPod|Macintosh/.test(navigator.userAgent)?"&":"?";location.href="sms:"+D.kontakt.sms+sep+"body="+encodeURIComponent(text())};
+  var ml=el("a","btns","Send e-post");ml.href="#";ml.onclick=function(e){e.preventDefault();if(!ok())return;location.href="mailto:"+D.kontakt.epost+"?subject="+encodeURIComponent(text())+"&body="+encodeURIComponent(text())};
+  acts.appendChild(sms);acts.appendChild(ml);f.appendChild(acts);
+  f.appendChild(el("p","hint","Meldingen åpnes ferdig utfylt. Du må trykke send selv. "+D.kontakt.navn+" legger fraværet inn i planen."));
+  f.onsubmit=function(e){e.preventDefault()};
+  return f;
+}
+// ---------- kode ----------
+var enc=new TextEncoder();
+function norm(c){return (c||"").toLowerCase().replace(/\s+/g,"").trim()}
+function b64d(s){var b=atob(s),u=new Uint8Array(b.length);for(var i=0;i<b.length;i++)u[i]=b.charCodeAt(i);return u}
+async function open_(code){
+  if(!window.crypto||!crypto.subtle)throw new Error("nocrypto");
+  var km=await crypto.subtle.importKey("raw",enc.encode(norm(code)),"PBKDF2",false,["deriveKey"]);
+  var key=await crypto.subtle.deriveKey({name:"PBKDF2",salt:b64d(P.salt),iterations:P.iter,hash:"SHA-256"},km,{name:"AES-GCM",length:256},false,["decrypt"]);
+  var pt=await crypto.subtle.decrypt({name:"AES-GCM",iv:b64d(P.iv)},key,b64d(P.ct));
+  return JSON.parse(new TextDecoder().decode(pt));
+}
+function start(data){D=data;if(S.me&&D.ansatte.indexOf(S.me)<0)S.me="";setUpd();render()}
+function login(msg){
+  var app=document.getElementById("app");app.innerHTML="";document.getElementById("upd").textContent="Grindberg Trevarefabrikk";
+  var f=el("form","login");f.appendChild(el("h2",null,"Logg inn"));
+  if(msg){f.appendChild(el("p","err",msg))}
+  f.appendChild(el("p",null,"Skriv inn koden du har fått for arbeidsplanen. Telefonen husker den etterpå."));
+  var i=el("input");i.id="kode";i.type="text";i.autocomplete="off";i.autocapitalize="none";i.spellcheck=false;i.setAttribute("aria-label","Kode");i.placeholder="Kode";f.appendChild(i);
+  var b=el("button",null,"Åpne planen");b.type="submit";f.appendChild(b);
+  f.onsubmit=function(e){e.preventDefault();var c=i.value;if(!norm(c)){i.focus();return}b.disabled=true;b.textContent="Åpner …";
+    open_(c).then(function(d){set("gb-kode",norm(c));start(d)}).catch(function(err){login(err&&err.message==="nocrypto"?"Nettleseren kan ikke åpne planen. Prøv Safari eller Chrome.":"Feil kode. Prøv igjen.")})};
+  app.appendChild(f);setTimeout(function(){i.focus()},50);
+}
+function logout(){set("gb-kode",null);login()}
+var saved=get("gb-kode");
+if(saved){open_(saved).then(start).catch(function(){set("gb-kode",null);login("Koden er byttet. Skriv inn den nye koden.")})}else login();
 document.addEventListener("visibilitychange",function(){if(document.visibilityState==="visible"&&Date.now()-now.getTime()>30*60e3)location.reload()});
 })();
 </script>

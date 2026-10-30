@@ -82,16 +82,41 @@ button{font:inherit;color:inherit;cursor:pointer}
 .foot{font-size:12.5px;color:var(--muted);text-align:center}
 .install{background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:12px 14px;font-size:14.5px;display:flex;flex-direction:column;gap:6px}
 .install b{font-size:15px}
+.login{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:20px 18px;display:flex;flex-direction:column;gap:12px;margin-top:10px}
+.login h2{margin:0;font-family:var(--display);font-size:28px}
+.login p{margin:0;color:var(--muted)}
+.login .err{color:#b3261e;font-weight:700}
+@media (prefers-color-scheme:dark){.login .err{color:#ff8a80}}
+.login input{border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:8px;padding:12px;font:inherit;font-size:20px;letter-spacing:.04em;min-height:50px;width:100%}
+.login button{border:0;background:var(--accent);color:var(--paper);border-radius:8px;padding:12px;font-weight:700;font-size:17px;min-height:50px}
+.login button[disabled]{opacity:.6}
+.link{border:0;background:none;color:var(--muted);text-decoration:underline;font-size:12.5px;padding:0}
+.awaybox{background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:10px 12px;display:flex;flex-direction:column;gap:6px}
+.awaybox h3{margin:0;font-size:13px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.awaybox .aw{font-size:14px;color:var(--muted);display:inline-flex;align-items:center;gap:4px}
+.report{align-self:stretch;border:1px solid var(--line);background:var(--paper);border-radius:8px;padding:12px;font-weight:700;font-size:16px;min-height:48px}
+.repf{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:16px;display:flex;flex-direction:column;gap:10px}
+.repf h2{margin:0;font-family:var(--display);font-size:24px}
+.fl{display:flex;flex-direction:column;gap:4px;min-width:0}
+.fl span{font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.fl select,.fl input{border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:8px;padding:10px;font:inherit;min-height:46px;width:100%}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.racts{display:flex;flex-direction:column;gap:8px;margin-top:4px}
+.btnp,.btns{display:block;text-align:center;text-decoration:none;border-radius:8px;padding:12px;font-weight:700;font-size:16px;min-height:48px}
+.btnp{background:var(--accent);color:var(--paper)}
+.btns{border:1px solid var(--line);color:var(--ink)}
+.repf .hint{margin:0;font-size:13px;color:var(--muted)}
+.repf .err{margin:0;color:#b3261e;font-weight:700}
 .install button{align-self:flex-end;border:0;background:none;color:var(--muted);font-size:13px;padding:2px 0}
 </style>
 </head>
 <body>
 <header class="top"><div class="row"><img src="icon-192.png" alt=""><div><h1>Arbeidsplan</h1><div class="sub" id="upd"></div></div></div></header>
-<main class="wrap" id="app"><div class="empty">Laster planen …</div></main>
-<script id="data" type="application/json">{"oppdatert": "2026-10-30T08:21:35.059473+01:00", "stasjoner": [{"id": "cnc", "navn": "CNC"}, {"id": "kant", "navn": "Kantliming"}, {"id": "mont", "navn": "Montering"}, {"id": "lakk", "navn": "Lakk"}, {"id": "lev", "navn": "Pakking / levering"}, {"id": "smvu1mt53", "navn": "Befaring"}, {"id": "smvu1n5gu", "navn": "Produksjon"}], "ansatte": ["Henrik", "Aslak", "Jens", "Dima", "Anton", "Vova", "Artem", "Daniil", "Alexander"], "farger": {"Aslak": 0, "Henrik": 1, "Jens": 2, "Dima": 3, "Anton": 4, "Vova": 5, "Artem": 6, "Daniil": 7, "Alexander": 11}, "oppgaver": [{"dato": "2026-10-30", "stasjon": "smvu1n5gu", "ordreId": "", "tekst": "Du kan kjøre flishuggeren, og hugge opp de pallene med kapp som står ute på kaldtlageret. Og hogge opp det som står i fabrikken. Husk å skru på avsug hvert 10 min. Etter det kan du begynne å lage en oversikt på lager rommet, og lage en oversikt over hva vi har på lager, og bli litt kjent med produktene.", "hvem": "Daniil", "ferdig": false, "opprettet": 1793308937637}, {"dato": "2026-10-30", "stasjon": "smvu1n5gu", "ordreId": "", "tekst": "Forsette å lime Butcher Block til kjøkkenøy. Fortsette på fronter til Ingunn", "hvem": "Aslak", "ferdig": false, "opprettet": 1793308667371}, {"dato": "2026-10-30", "stasjon": "lakk", "ordreId": "", "tekst": "Pusse og olje to barnesenger som ligger i lakken. \nFarge:Osmo hvit", "hvem": "Artem", "ferdig": false, "opprettet": 1793308554870}, {"dato": "2026-10-30", "stasjon": "cnc", "ordreId": "", "tekst": "Jens kjører CNC fredag. Også kan Vova montere kjøkken til Ingunn", "hvem": "Jens", "ferdig": false, "opprettet": 1793308815005}, {"dato": "2026-10-30", "stasjon": "lakk", "ordreId": "", "tekst": "Vi fortsetter med det dere har i lakkeringa😃", "hvem": "Dima, Anton", "ferdig": false, "opprettet": 1793308744624}], "ordre": [], "uker": {"2026-W44": {"tekst": "Vi prioriterer å få ferdig kjøkkenet til Ingunn, inkludert kjøkkenøy. Også prøver vi å lage litt orden og holde det ryddig i fabrikken. Hugger opp alt av kapp, og feier gulvet. \n\nVi skal også nå lage mer orden i hallen, forbereder oss på at vi kan få mye å gjøre neste år, så det er viktig at vi er klare til det. Så om dere føler dere har lite å gjøre, så rydder vi, eller lager opp deler til lager."}}}</script>
+<main class="wrap" id="app"><div class="empty">Åpner planen …</div></main>
+<script id="data" type="application/json">{"salt": "bvSEYNq7FPovAb9O2d4+Sw==", "iv": "bladIZ5sm8f7pcGH", "iter": 310000, "ct": "RWma+W+90Bv1Mq3qqMdUPZepAKrg2BiTkTnCd9VfNfNjtye+cHc+yQn/+C5eKp9440pO+mYL+fGGTOFTQO06wR2QXWXrbDs7QDoAtuBYGwLIdgAEr9Wb++Aj5/dlp1RuOhQqO4VpOK8yUW1+BTJN0sgXZi+f/U56YLoeDf+LF2bSc516+WzNfZPX4y+YKCP5yYDq5SdXJj0QE1CSZ0xq8jzGra5HZjyi13QUMjh0CMJ7dEfHhbRqraPBosRmdULiPTcVSFzpIpUlXEGQBElFXZDn/45g5PeBvsSpd7QKygCtir8FUokik3v3jWStkMRJ/XVUkHg59XykseAeEbkGHWx5QKaOugf3mstIbGEbGEuef2pk4q+JYwRLr4HwkT7O8MpblAoFxwC525eOtXyWwvdbGP1dVUab98CYdIbmS2ZAb/XGpQ8lUNM7B7F/GFNDHtRKRJGxHZem59hOR+t8jbuaYva6Ik5XfxANa65Q7fNHOXx7EhNGAySYVUeA/di6qcdo23G1mqXI6ehenZqlVTJwcpaceCOfXz4p6wi3SqH7k0VmeSIQM8Ov0tiZ7bxuQPasjVI9OJzbat+wKo9JxVk5q68TiU5bVZ/Utc59LmQOW79LpbVy5lX+Lz8xkGrhDYd1ImcbAqupBYPhuhsAhNBqcXuNXp04sLnMgO1Ih2mWsyZL5J3a1i5QNWw55nrJwKUMItuOrDsMkVP5t2BsjPvPgYq2pW/f5zSui8x6uD3KW0vxcpYXgQiic86bPiVa97Y3rMS9vscvp3Dk2zEO9FYCKuuEtJUf1ovXL9kKiCzosrdHYCtyTj61EOzh/2DtKG3k7gPiR8AdMoveDb+wKb0u1pZN2SX3AuWDqaBtJbcvw5XRdrKFFQxUeDDqjTX2MTAAd5yBz6f0wxNT+NcikJNh+u0H5GQjrMqF7bOcDjAhNhX9q6qfsBOnTfxlROAL/3uSh/GceAvrwAb5JJBCh/db4QVh6BCUdtBH4iL+I5TRjb4VCdleBJIF8+/tUebCIqbjoJzT/5v2Gji3SJCkThLMIf9tQrc93r1rqvKl/9nyVewvbQipCGM/liStxgravWDfHVlT2S25FlEQz4sRUvlrZDjEoibY3XlGJGp1dEJpXpGuXDgq3arank1mNoY2mbGnaBb7SZsxJa8F8ciQ5f04nn1tliOIElcKHfF72NRWVEccGgThUWoETH9xnl7D4xN0SjL5ehZlzntZvjtWx/nAl7VXaPSqu2AJGMenKdMPlSGddBr4quKZcDI6xMne/3Bwl9kk2oyeTXUVIIiPzVorvwEM++mJFlohP8ovBYSUQ4af1mpqHLxqnQ5f4G9l3PDADL5vyuLqdFn/kai+BEwVmNGOR+tYxVhFwtaIhfLBQ9ncij2fd1dJi6A/Fl5rEDRnKNYB1PvJWgz1LkEgtb5asOAbxfgFzDCpFs6vDtdQD3fqWaT2cpUogCUOXoLrPqQj1WOvwvlib6lv3qqpv0SfBhpufUwM0brB83YbyhNKohP6a0RD0QmbFs3YAIgPNq7QhPmzeol9rVRT4+/kmRxicg7KYG6FbPvZ7ihNdmWhQgj2kvuw23fGuUUr1JSN9mpaQHm/qvdaPmnzzLYfSSbLmM0PWZUIkma/BK6om1xm8+Oup2Gcc8KmEQHFDRpU8I7zs7ZYy8PdrIjzz0i2DeAow6o8+uJbOqdvQ6eRqq7lUwPzNO2firjIEInKMk3B7w2PMWn7YUet9AIZEVyOJNYDh9KcQMDbu87OlTM3KLTN9hXEjFUPIygNThQibDpqm8yZtPVzGwzxFm6nfV0Ck/fPzCWt2yWZYbJIU7G6a7+JeC9QplVB59xuYgO6+ZE1NZPMKDcZeXZZsr+Hpd1eRDBmYnbSdeZmMu6x0j3bvlkQ9rkAQHwyC1yG4rSGzhl0XdK1P6TnCmskuCs2ppgTtV71LKac1JkHuHS8R8DermqJD+Ok/vcZ9y/x7adKcSxtM/iKblsdSMF9SUHSMTOiWGsN9qLZVFei2VapCX7lE8vjCXjE0uYw56+cE+JIqcuG9LTZqVzE0gG98QOsAMJ+epAFzFA0c8KnTM4uPCof7lK7NExhVv6RqfhVOUs8v2afChaeuURJfD4jS638bwy83aM+PNDnJdsy1QjNImjum/qDsT6Ow4ni51JnfvRsyTQRuhls4Fwq/tDXOK/Msd5HpyE7+/AD+RsG4ezNWddfrjapvbKapoS5fdQdtn5qfc6STb4PJC95ofdVwxC5wDiURsrm9F0nAVyTvBsOhfvcz6Z0kwIwiCe216m9Pv2LZ8pcDotCXmayE63/btmwb2u2RIF28dl7lc/nNhSbuMkSibFx44U5SdlvJNibTsU72GxtPvIU3+Nlo/pJnz9xs7MhdNohubYWjtZO0+1/db0Bj5zHAOM61qslDwVXsHHtQIxqPflcgbDbK48aMBALEkGmSObDhnL98b5txH4Jf5ZPJouvrwHfJczDtDGRCBrJJXoq596v/pCnDEvgqZYooN7L2kPmnbP6VfE+VcqCDMWWPuf1FhdX+KFrys8wthSm9/oH0ZE9y1t7De0fe4qSiLwaPopJFFH7r6oFh/71evOr+zK9TGCV0x/hKodC04Bq4j27JFmJMD70EOzQ0eba1boVyyzQxVtlvglHfWdKnVoQoD3+HRmcYLsAsGmcTbwbK2v58NwyJ4QRf8OfB9FXhMGEG46Ve5ZPFfGHY2tt7RJFfrmTKZdfm2FNmWnwrjoZY5XoioikYgBd9RdBqeOQuOJ0WGlSXwj+4QRiv1jPXfm0ItzVOL4JrpgJB6tP2DfDnEBtNIxiJ+DywHwAhCzCIGUUBdgwMRvhlYXixJbSJEUjmnjx0piTSDWankwfCCIy9IDt7sSKtb4r4VvwnQwkFjX69OoQxGKrCHaaeQ19vsk8LBFcdumYmlnWmSYyKywrM/2sL6CdHp4o/kUz5ACkIAZqxWhfJ/Fewv5yH+aIXVzEbFUHVhNY74NJ/7udPgbGnpGo/X6HgAuQ+X6SckkDaXrmpqdixiipTzNZWO3lBnyRjAiqdZuTB9n6fuZQfMT/G3Pbi89HDR5XayeK++WqWCU1hhFz5/lQU0YwSUSrxqT4QWMvi2Y5rUl2Ne96nQH6fYtz7Cjp9DHOkynXF6HYCG9//lMj+xufnpo90tGVwNf38IsCa3TS6TBoHPvZlXqVXn2eJtEBtSYUiocVVfWEgtnT4uxIjcZ7iL2Gs6nEIUhr1rje2W8cAtmG1zpN6yfZuXDwr6plYaBNO85jMwKqFqNiYtpTCwvzLuVNM3bWv0d5B5gIIsAqFrxrDgRtDASCySS1EgDeuhL9Nikk46cQzSFeHgMbmsV/4z1VYVTeEN1vcDG0SbVTK+zN+jIH9KsfhJ9VYgGdi9b0ktzKt49C/QbMlqDLYwNAZfEGh6w/Pjq7v0v9g76sXGeXrA=="}</script>
 <script>
 (function(){
-var D=JSON.parse(document.getElementById("data").textContent);
+var P=JSON.parse(document.getElementById("data").textContent),D=null;
 var DAYS=["Mandag","Tirsdag","Onsdag","Torsdag","Fredag","Lørdag","Søndag"],MON=["jan","feb","mar","apr","mai","jun","jul","aug","sep","okt","nov","des"];
 function pad(n){return String(n).padStart(2,"0")}
 function iso(d){return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate())}
@@ -109,7 +134,6 @@ var now=new Date(),TODAY=iso(now);
 var base=monday(now);if(now.getDay()===6||now.getDay()===0)base=add(base,7);
 var weeks=[0,1,2,3].map(function(i){return add(base,7*i)});
 var S={w:0,day:null,me:get("gb-me")||"",all:get("gb-all")==="1"};
-if(S.me&&D.ansatte.indexOf(S.me)<0)S.me="";
 (function(){var di=(now.getDay()+6)%7;S.day=(now.getDay()===6||now.getDay()===0)?iso(base):(di<5?TODAY:iso(base))})();
 
 function pIdx(n){n=(n||"").trim();if(!n)return -1;var f=D.farger||{};if(f[n]!=null)return f[n]%12;var i=D.ansatte.indexOf(n);return i>=0?i%12:-1}
@@ -117,9 +141,10 @@ function pv(i){return i<0?"var(--muted)":"var(--p"+i+")"}
 function names(t){return (t.hvem||"").split(",").map(function(x){return x.trim()}).filter(Boolean)}
 function order(id){for(var i=0;i<D.ordre.length;i++)if(D.ordre[i].id===id)return D.ordre[i];return null}
 function mine(t){return !S.me||names(t).indexOf(S.me)>=0}
+function awayOn(day){return (D.fravaer||[]).filter(function(f){return f.fra<=day&&(f.til||f.fra)>=day})}
 function tasksOn(day){return D.oppgaver.filter(function(t){return t.dato===day})}
 
-var u=new Date(D.oppdatert);document.getElementById("upd").textContent="Oppdatert "+DAYS[(u.getDay()+6)%7].toLowerCase()+" "+short(u)+" kl. "+pad(u.getHours())+":"+pad(u.getMinutes());
+function setUpd(){var u=new Date(D.oppdatert);document.getElementById("upd").textContent="Oppdatert "+DAYS[(u.getDay()+6)%7].toLowerCase()+" "+short(u)+" kl. "+pad(u.getHours())+":"+pad(u.getMinutes())}
 
 function render(){
   var app=document.getElementById("app");app.innerHTML="";
@@ -154,7 +179,10 @@ function render(){
   var note=(D.uker[wkey(ws)]||{}).tekst;
   if(note){var n=el("section","note");n.appendChild(el("h2",null,"Beskjed"));n.appendChild(el("p",null,note));app.appendChild(n)}
 
+  var aw=awayOn(S.day);
   var sd=parse(S.day);app.appendChild(el("h2","dayh",DAYS[(sd.getDay()+6)%7]+" "+short(sd)+(S.day===TODAY?" · i dag":"")));
+  if(aw.length){var ab=el("section","awaybox");ab.appendChild(el("h3",null,"Borte"));var al=el("div","w");
+    aw.forEach(function(f){var x=el("span","aw");var ch=el("span","chip",f.hvem);ch.style.setProperty("--cc",pv(pIdx(f.hvem)));x.appendChild(ch);x.appendChild(document.createTextNode(" "+(f.type||"Borte")));al.appendChild(x)});ab.appendChild(al);app.appendChild(ab)}
   var all=tasksOn(S.day);var show=S.me&&!S.all?all.filter(mine):all;
   if(!all.length){app.appendChild(el("div","empty","Ingenting planlagt denne dagen."))}
   else if(!show.length){app.appendChild(el("div","empty",S.me+" har ingen jobber denne dagen."))}
@@ -171,6 +199,8 @@ function render(){
     app.appendChild(g)});
   if(S.me&&all.length&&all.length!==all.filter(mine).length){var tg=el("button","toggle",S.all?"Vis bare mine jobber":"Vis hele verkstedet");tg.type="button";tg.onclick=function(){S.all=!S.all;set("gb-all",S.all?"1":null);render()};app.appendChild(tg)}
 
+  var mb=el("button","report","Meld fravær");mb.type="button";mb.onclick=function(){S.rep=!S.rep;render();if(S.rep)setTimeout(function(){var e=document.getElementById("rep");if(e)e.scrollIntoView({behavior:"smooth",block:"start"})},30)};app.appendChild(mb);
+  if(S.rep)app.appendChild(reportForm());
   var lev=D.ordre.filter(function(o){return o.levering}).sort(function(a,b){return a.levering<b.levering?-1:1});
   if(lev.length){app.appendChild(el("p","lbl","Kommende leveranser"));var L=el("section","lev");
     lev.forEach(function(o){var r=el("div");r.appendChild(el("span",null,(o.nr?o.nr+" · ":"")+(o.navn||"")+(o.hva?" – "+o.hva:"")));r.appendChild(el("span",null,short(parse(o.levering))));L.appendChild(r)});app.appendChild(L)}
@@ -181,9 +211,58 @@ function render(){
     ins.appendChild(el("span",null,ios?"Trykk Del-knappen i Safari (firkant med pil opp) og velg «Legg til på Hjem-skjerm».":"Trykk ⋮ øverst i Chrome og velg «Legg til på startskjermen» eller «Installer app»."));
     var x=el("button",null,"Skjul");x.type="button";x.onclick=function(){set("gb-noinst","1");render()};ins.appendChild(x);app.appendChild(ins)}
 
-  app.appendChild(el("p","foot","Grindberg Trevarefabrikk · Kilegrend"));
+  var ft=el("p","foot","Grindberg Trevarefabrikk · Kilegrend · ");var lo=el("button","link","Logg ut");lo.type="button";lo.onclick=logout;ft.appendChild(lo);app.appendChild(ft);
 }
-render();
+// ---------- fravær ----------
+var TYPER=["Syk","Egenmelding","Sykt barn","Ferie / fri","Lege / tannlege","Annet"];
+function reportForm(){
+  var f=el("form","repf");f.id="rep";f.appendChild(el("h2",null,"Meld fravær"));
+  function fld(lbl,inp){var w=el("label","fl");w.appendChild(el("span",null,lbl));w.appendChild(inp);return w}
+  var who=el("select");who.id="r-hvem";[""].concat(D.ansatte).forEach(function(n){var o=el("option",null,n||"Velg navn");o.value=n;if(n===S.me)o.selected=true;who.appendChild(o)});
+  var fra=el("input");fra.type="date";fra.id="r-fra";fra.value=S.day<TODAY?TODAY:S.day;
+  var til=el("input");til.type="date";til.id="r-til";til.value=fra.value;fra.onchange=function(){if(!til.value||til.value<fra.value)til.value=fra.value};
+  var typ=el("select");typ.id="r-type";TYPER.forEach(function(t){var o=el("option",null,t);o.value=t;typ.appendChild(o)});
+  var nt=el("input");nt.id="r-notat";nt.placeholder="Valgfritt";
+  f.appendChild(fld("Hvem",who));var row=el("div","two");row.appendChild(fld("Fra",fra));row.appendChild(fld("Til og med",til));f.appendChild(row);
+  f.appendChild(fld("Årsak",typ));f.appendChild(fld("Merknad",nt));
+  var msg=el("p","err");msg.hidden=true;f.appendChild(msg);
+  function text(){var a=parse(fra.value),b=parse(til.value||fra.value);var per=fra.value===til.value||!til.value?DAYS[(a.getDay()+6)%7].toLowerCase()+" "+short(a):short(a)+" – "+short(b);
+    return "Fravær: "+who.value+" – "+typ.value+" "+per+(nt.value.trim()?". "+nt.value.trim():"")}
+  function ok(){if(!who.value){msg.textContent="Velg navnet ditt.";msg.hidden=false;return false}if(!fra.value){msg.textContent="Velg dato.";msg.hidden=false;return false}msg.hidden=true;return true}
+  var acts=el("div","racts");
+  var sms=el("a","btnp","Send SMS til "+D.kontakt.navn);sms.href="#";sms.onclick=function(e){e.preventDefault();if(!ok())return;var sep=/iPhone|iPad|iPod|Macintosh/.test(navigator.userAgent)?"&":"?";location.href="sms:"+D.kontakt.sms+sep+"body="+encodeURIComponent(text())};
+  var ml=el("a","btns","Send e-post");ml.href="#";ml.onclick=function(e){e.preventDefault();if(!ok())return;location.href="mailto:"+D.kontakt.epost+"?subject="+encodeURIComponent(text())+"&body="+encodeURIComponent(text())};
+  acts.appendChild(sms);acts.appendChild(ml);f.appendChild(acts);
+  f.appendChild(el("p","hint","Meldingen åpnes ferdig utfylt. Du må trykke send selv. "+D.kontakt.navn+" legger fraværet inn i planen."));
+  f.onsubmit=function(e){e.preventDefault()};
+  return f;
+}
+// ---------- kode ----------
+var enc=new TextEncoder();
+function norm(c){return (c||"").toLowerCase().replace(/\s+/g,"").trim()}
+function b64d(s){var b=atob(s),u=new Uint8Array(b.length);for(var i=0;i<b.length;i++)u[i]=b.charCodeAt(i);return u}
+async function open_(code){
+  if(!window.crypto||!crypto.subtle)throw new Error("nocrypto");
+  var km=await crypto.subtle.importKey("raw",enc.encode(norm(code)),"PBKDF2",false,["deriveKey"]);
+  var key=await crypto.subtle.deriveKey({name:"PBKDF2",salt:b64d(P.salt),iterations:P.iter,hash:"SHA-256"},km,{name:"AES-GCM",length:256},false,["decrypt"]);
+  var pt=await crypto.subtle.decrypt({name:"AES-GCM",iv:b64d(P.iv)},key,b64d(P.ct));
+  return JSON.parse(new TextDecoder().decode(pt));
+}
+function start(data){D=data;if(S.me&&D.ansatte.indexOf(S.me)<0)S.me="";setUpd();render()}
+function login(msg){
+  var app=document.getElementById("app");app.innerHTML="";document.getElementById("upd").textContent="Grindberg Trevarefabrikk";
+  var f=el("form","login");f.appendChild(el("h2",null,"Logg inn"));
+  if(msg){f.appendChild(el("p","err",msg))}
+  f.appendChild(el("p",null,"Skriv inn koden du har fått for arbeidsplanen. Telefonen husker den etterpå."));
+  var i=el("input");i.id="kode";i.type="text";i.autocomplete="off";i.autocapitalize="none";i.spellcheck=false;i.setAttribute("aria-label","Kode");i.placeholder="Kode";f.appendChild(i);
+  var b=el("button",null,"Åpne planen");b.type="submit";f.appendChild(b);
+  f.onsubmit=function(e){e.preventDefault();var c=i.value;if(!norm(c)){i.focus();return}b.disabled=true;b.textContent="Åpner …";
+    open_(c).then(function(d){set("gb-kode",norm(c));start(d)}).catch(function(err){login(err&&err.message==="nocrypto"?"Nettleseren kan ikke åpne planen. Prøv Safari eller Chrome.":"Feil kode. Prøv igjen.")})};
+  app.appendChild(f);setTimeout(function(){i.focus()},50);
+}
+function logout(){set("gb-kode",null);login()}
+var saved=get("gb-kode");
+if(saved){open_(saved).then(start).catch(function(){set("gb-kode",null);login("Koden er byttet. Skriv inn den nye koden.")})}else login();
 document.addEventListener("visibilitychange",function(){if(document.visibilityState==="visible"&&Date.now()-now.getTime()>30*60e3)location.reload()});
 })();
 </script>

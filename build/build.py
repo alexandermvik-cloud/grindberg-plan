@@ -5,7 +5,10 @@ Bruk: python3 build/build.py <db-mappe> <ut-mappe>
 <db-mappe> inneholder undermappene oppsett/, oppgaver/, ordre/ og uker/
 med ett JSON-dokument per fil (slik ArtifactData lagrer dem med out_dir).
 """
-import json, os, sys, shutil, datetime
+import json, os, sys, shutil, datetime, base64
+from cryptography.hazmat.primitives.ciphers.aead import AESGCM
+from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
+from cryptography.hazmat.primitives import hashes
 from zoneinfo import ZoneInfo
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -46,6 +49,11 @@ orders = [
 for o in orders:
     if o.get("levering") and o["levering"] < now.date().isoformat():
         pass
+fravaer = [
+    {k: f.get(k) for k in ("hvem", "fra", "til", "type", "notat")}
+    for f in read("fravaer")
+    if f.get("fra") and (f.get("til") or f["fra"]) >= first.isoformat() and f["fra"] <= last.isoformat()
+]
 uker = {u["id"]: {"tekst": u.get("tekst", "")} for u in read("uker")}
 
 data = {
@@ -56,10 +64,20 @@ data = {
     "oppgaver": tasks,
     "ordre": [o for o in orders],
     "uker": uker,
+    "fravaer": fravaer,
+    "kontakt": {"sms": "+4745391411", "epost": "alexander@grindberg.no", "navn": "Alexander"},
 }
 os.makedirs(out, exist_ok=True)
 tpl = open(os.path.join(HERE, "template.html"), encoding="utf-8").read()
-js = json.dumps(data, ensure_ascii=False).replace("</", "<\\/")
+kode = "".join(((oppsett.get("tilgang") or {}).get("kode") or "").lower().split())
+if not kode:
+    sys.exit("Mangler kode i oppsett/tilgang - siden bygges ikke uten innlogging.")
+ITER = 310000
+salt, iv = os.urandom(16), os.urandom(12)
+key = PBKDF2HMAC(algorithm=hashes.SHA256(), length=32, salt=salt, iterations=ITER).derive(kode.encode())
+ct = AESGCM(key).encrypt(iv, json.dumps(data, ensure_ascii=False).encode(), None)
+b = lambda x: base64.b64encode(x).decode()
+js = json.dumps({"salt": b(salt), "iv": b(iv), "iter": ITER, "ct": b(ct)})
 open(os.path.join(out, "index.html"), "w", encoding="utf-8").write(tpl.replace("__DATA__", js))
 for f in ("icon-32.png", "icon-192.png", "icon-512.png", "icon-maskable-512.png", "apple-touch-icon.png"):
     shutil.copy(os.path.join(HERE, f), os.path.join(out, f))
