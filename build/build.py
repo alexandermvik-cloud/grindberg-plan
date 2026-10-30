@@ -73,13 +73,14 @@ kode = "".join(((oppsett.get("tilgang") or {}).get("kode") or "").lower().split(
 if not kode:
     sys.exit("Mangler kode i oppsett/tilgang - siden bygges ikke uten innlogging.")
 ITER = 310000
-salt, iv = os.urandom(16), os.urandom(12)
+import hashlib
+salt, iv = hashlib.sha256(("grindberg-plan|" + kode).encode()).digest()[:16], os.urandom(12)
 key = PBKDF2HMAC(algorithm=hashes.SHA256(), length=32, salt=salt, iterations=ITER).derive(kode.encode())
 ct = AESGCM(key).encrypt(iv, json.dumps(data, ensure_ascii=False).encode(), None)
 b = lambda x: base64.b64encode(x).decode()
 js = json.dumps({"salt": b(salt), "iv": b(iv), "iter": ITER, "ct": b(ct)})
 open(os.path.join(out, "index.html"), "w", encoding="utf-8").write(tpl.replace("__DATA__", js))
-for f in ("icon-32.png", "icon-192.png", "icon-512.png", "icon-maskable-512.png", "apple-touch-icon.png"):
+for f in ("forge.min.js", "icon-32.png", "icon-192.png", "icon-512.png", "icon-maskable-512.png", "apple-touch-icon.png"):
     shutil.copy(os.path.join(HERE, f), os.path.join(out, f))
 manifest = {
     "name": "Arbeidsplan Grindberg",

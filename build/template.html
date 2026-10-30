@@ -241,13 +241,23 @@ function reportForm(){
 var enc=new TextEncoder();
 function norm(c){return (c||"").toLowerCase().replace(/\s+/g,"").trim()}
 function b64d(s){var b=atob(s),u=new Uint8Array(b.length);for(var i=0;i<b.length;i++)u[i]=b.charCodeAt(i);return u}
-async function open_(code){
-  if(!window.crypto||!crypto.subtle)throw new Error("nocrypto");
-  var km=await crypto.subtle.importKey("raw",enc.encode(norm(code)),"PBKDF2",false,["deriveKey"]);
-  var key=await crypto.subtle.deriveKey({name:"PBKDF2",salt:b64d(P.salt),iterations:P.iter,hash:"SHA-256"},km,{name:"AES-GCM",length:256},false,["decrypt"]);
-  var pt=await crypto.subtle.decrypt({name:"AES-GCM",iv:b64d(P.iv)},key,b64d(P.ct));
-  return JSON.parse(new TextDecoder().decode(pt));
-}
+function hex(u){return Array.prototype.map.call(u,function(x){return ("0"+x.toString(16)).slice(-2)}).join("")}
+function unhex(h){var u=new Uint8Array(h.length/2);for(var i=0;i<u.length;i++)u[i]=parseInt(h.substr(i*2,2),16);return u}
+function bin(u){var s="";for(var i=0;i<u.length;i++)s+=String.fromCharCode(u[i]);return s}
+var hasSubtle=!!(window.crypto&&crypto.subtle);
+function loadForge(){return new Promise(function(res,rej){if(window.forge)return res();var sc=document.createElement("script");sc.src="forge.min.js";sc.onload=function(){res()};sc.onerror=function(){rej(new Error("nocrypto"))};document.head.appendChild(sc)})}
+async function derive(code){
+  if(hasSubtle){var km=await crypto.subtle.importKey("raw",enc.encode(norm(code)),"PBKDF2",false,["deriveBits"]);
+    return new Uint8Array(await crypto.subtle.deriveBits({name:"PBKDF2",salt:b64d(P.salt),iterations:P.iter,hash:"SHA-256"},km,256))}
+  await loadForge();var k=forge.pkcs5.pbkdf2(forge.util.encodeUtf8(norm(code)),bin(b64d(P.salt)),P.iter,32,forge.md.sha256.create());
+  var u=new Uint8Array(32);for(var i=0;i<32;i++)u[i]=k.charCodeAt(i);return u}
+async function decrypt(key){
+  var ct=b64d(P.ct),iv=b64d(P.iv);
+  if(hasSubtle){var ck=await crypto.subtle.importKey("raw",key,{name:"AES-GCM"},false,["decrypt"]);return JSON.parse(new TextDecoder().decode(await crypto.subtle.decrypt({name:"AES-GCM",iv:iv},ck,ct)))}
+  await loadForge();var d=forge.cipher.createDecipher("AES-GCM",bin(key));d.start({iv:bin(iv),tagLength:128,tag:forge.util.createBuffer(bin(ct.slice(ct.length-16)))});
+  d.update(forge.util.createBuffer(bin(ct.slice(0,ct.length-16))));if(!d.finish())throw new Error("feil");return JSON.parse(forge.util.decodeUtf8(d.output.getBytes()))}
+async function open_(code){var key=await derive(code);var data=await decrypt(key);set("gb-key",hex(key));set("gb-salt",P.salt);return data}
+async function openSaved(){var k=get("gb-key");if(k&&get("gb-salt")===P.salt)return decrypt(unhex(k));var c=get("gb-kode");if(c)return open_(c);throw new Error("ingen")}
 function start(data){D=data;if(S.me&&D.ansatte.indexOf(S.me)<0)S.me="";setUpd();render()}
 function login(msg){
   var app=document.getElementById("app");app.innerHTML="";document.getElementById("upd").textContent="Grindberg Trevarefabrikk";
@@ -256,13 +266,12 @@ function login(msg){
   f.appendChild(el("p",null,"Skriv inn koden du har fått for arbeidsplanen. Telefonen husker den etterpå."));
   var i=el("input");i.id="kode";i.type="text";i.autocomplete="off";i.autocapitalize="none";i.spellcheck=false;i.setAttribute("aria-label","Kode");i.placeholder="Kode";f.appendChild(i);
   var b=el("button",null,"Åpne planen");b.type="submit";f.appendChild(b);
-  f.onsubmit=function(e){e.preventDefault();var c=i.value;if(!norm(c)){i.focus();return}b.disabled=true;b.textContent="Åpner …";
-    open_(c).then(function(d){set("gb-kode",norm(c));start(d)}).catch(function(err){login(err&&err.message==="nocrypto"?"Nettleseren kan ikke åpne planen. Prøv Safari eller Chrome.":"Feil kode. Prøv igjen.")})};
+  f.onsubmit=function(e){e.preventDefault();var c=i.value;if(!norm(c)){i.focus();return}b.disabled=true;b.textContent=hasSubtle?"Åpner …":"Åpner … (kan ta noen sekunder)";
+    open_(c).then(function(d){set("gb-kode",norm(c));start(d)}).catch(function(err){login(err&&err.message==="nocrypto"?"Fikk ikke åpnet planen. Sjekk at du har nett og prøv igjen.":"Feil kode. Prøv igjen.")})};
   app.appendChild(f);setTimeout(function(){i.focus()},50);
 }
-function logout(){set("gb-kode",null);login()}
-var saved=get("gb-kode");
-if(saved){open_(saved).then(start).catch(function(){set("gb-kode",null);login("Koden er byttet. Skriv inn den nye koden.")})}else login();
+function logout(){set("gb-kode",null);set("gb-key",null);set("gb-salt",null);login()}
+if(get("gb-kode")||get("gb-key")){openSaved().then(start).catch(function(e){if(e&&e.message==="nocrypto"){login("Fikk ikke åpnet planen. Sjekk at du har nett og prøv igjen.");return}set("gb-kode",null);set("gb-key",null);login("Koden er byttet. Skriv inn den nye koden.")})}else login();
 document.addEventListener("visibilitychange",function(){if(document.visibilityState==="visible"&&Date.now()-now.getTime()>30*60e3)location.reload()});
 })();
 </script>
