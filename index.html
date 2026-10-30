@@ -434,6 +434,10 @@ function logout(){set("gb-kode",null);login()}
 langBar();document.querySelector(".top h1").textContent=L("Arbeidsplan");document.documentElement.lang=LANG;
 if(get("gb-kode")){document.getElementById("app").innerHTML='<div class="empty">'+L("Henter planen …")+'</div>';refresh(true).then(function(){if(D)start();else if(get("gb-kode"))document.getElementById("app").innerHTML='<div class="empty">'+L("Fikk ikke kontakt med planen. Sjekk at du har nett. Den prøver igjen av seg selv.")+'</div>'})}else login();
 setInterval(function(){if(document.visibilityState==="visible"&&get("gb-kode"))refresh(false)},10000);
+var BUILD="1793365879";
+function checkVersion(){fetch("version.json?t="+Date.now(),{cache:"no-store"}).then(function(r){return r.json()}).then(function(j){if(j&&j.v&&j.v!==BUILD){var o=document.querySelector(".ov");if(!o)location.reload()}}).catch(function(){})}
+setTimeout(checkVersion,3000);setInterval(function(){if(document.visibilityState==="visible")checkVersion()},120000);
+document.addEventListener("visibilitychange",function(){if(document.visibilityState==="visible")checkVersion()});
 document.addEventListener("visibilitychange",function(){if(document.visibilityState==="visible"&&get("gb-kode"))refresh(false)});
 window.addEventListener("online",function(){refresh(false)});window.addEventListener("offline",function(){setUpd(true)});
 })();
