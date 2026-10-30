@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="no">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Arbeidsplan Grindberg</title>
+<meta name="description" content="Arbeidsplan for verkstedet på Grindberg Trevarefabrikk">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#1d2320">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Arbeidsplan">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" href="icon-32.png" sizes="32x32">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Source+Sans+3:wght@400;600;700&display=swap">
+<style>
+:root{
+  --bg:#eef0ec;--paper:#fff;--ink:#1d2320;--muted:#5d6862;--line:#d3d8d2;--soft:#e4e8e2;
+  --signal:#f2c230;--signal-ink:#3a2f00;--accent:#2f5d50;
+  --p0:#2f6fb3;--p1:#d0661f;--p2:#2e8a57;--p3:#8a3fa8;--p4:#9a7a00;--p5:#c23b6b;--p6:#2a8f9c;--p7:#8a5a3a;--p8:#c0392b;--p9:#66707a;--p10:#6b7a1f;--p11:#2c3e8f;
+  --display:"Barlow Condensed","Arial Narrow",Arial,sans-serif;--body:"Source Sans 3","Segoe UI",system-ui,sans-serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root{
+  --bg:#151917;--paper:#1e2421;--ink:#e7ece8;--muted:#9aa59f;--line:#333c37;--soft:#262d29;--signal:#e0b52c;--signal-ink:#2a2200;--accent:#6fb39f;
+  --p0:#6aa7e8;--p1:#f08a4b;--p2:#5cc48a;--p3:#c084e0;--p4:#e6c445;--p5:#ef7aa3;--p6:#62c6d3;--p7:#c99a78;--p8:#f07a6c;--p9:#a3acb5;--p10:#b5c45a;--p11:#8a9cf0;color-scheme:dark}}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.45}
+button{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.top{position:sticky;top:0;z-index:5;background:var(--ink);color:var(--paper);padding:calc(10px + env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) 10px max(16px,env(safe-area-inset-left,0px))}
+@media (prefers-color-scheme:dark){.top{background:#0c0f0d;color:var(--ink)}}
+.top .row{max-width:760px;margin:0 auto;display:flex;align-items:center;gap:12px}
+.top img{width:38px;height:38px;border-radius:50%;background:#fff;flex:0 0 auto}
+.top h1{margin:0;font-family:var(--display);font-size:26px;font-weight:700;line-height:1}
+.top .sub{font-size:12.5px;opacity:.75}
+.wrap{max-width:760px;margin:0 auto;padding:14px max(16px,env(safe-area-inset-right,0px)) calc(32px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));display:flex;flex-direction:column;gap:14px}
+.lbl{font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:0 0 6px}
+.people{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px;scrollbar-width:none}
+.people::-webkit-scrollbar{display:none}
+.pp{flex:0 0 auto;border:2px solid var(--line);background:var(--paper);border-radius:999px;padding:5px 12px 5px 8px;font-weight:700;font-size:15px;display:inline-flex;align-items:center;gap:6px;min-height:38px}
+.pp .d{width:12px;height:12px;border-radius:50%;background:var(--cc)}
+.pp[aria-pressed="true"]{border-color:var(--cc);background:color-mix(in srgb,var(--cc) 22%,var(--paper))}
+.weeknav{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.weeknav b{font-family:var(--display);font-size:22px;font-weight:700}
+.weeknav button{border:1px solid var(--line);background:var(--paper);border-radius:8px;width:40px;height:38px;font-size:18px}
+.weeknav button[disabled]{opacity:.35;cursor:default}
+.days{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+.day{border:1px solid var(--line);background:var(--paper);border-radius:8px;padding:6px 2px;display:flex;flex-direction:column;align-items:center;gap:1px;min-height:58px;position:relative}
+.day .n{font-weight:700;font-size:14px}
+.day .dt{font-size:12px;color:var(--muted)}
+.day .c{position:absolute;top:4px;right:5px;min-width:16px;height:16px;border-radius:8px;background:var(--cc,var(--muted));color:var(--paper);font-size:10.5px;font-weight:700;display:grid;place-items:center;padding:0 4px}
+.day.today{border-color:var(--signal);box-shadow:inset 0 -3px 0 var(--signal)}
+.day[aria-pressed="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.day[aria-pressed="true"] .dt{color:inherit;opacity:.75}
+.note{background:var(--paper);border:1px solid var(--line);border-left:5px solid var(--signal);border-radius:8px;padding:12px 14px}
+.note h2{margin:0 0 4px;font-family:var(--display);font-size:20px}
+.note p{margin:0;white-space:pre-wrap;overflow-wrap:anywhere}
+.dayh{font-family:var(--display);font-size:26px;font-weight:700;margin:4px 0 0}
+.grp{display:flex;flex-direction:column;gap:8px}
+.grp h3{margin:6px 0 0;font-size:13px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.task{--pc:var(--line);background:var(--paper);border:1px solid var(--line);border-left:6px solid var(--pc);border-radius:8px;padding:10px 12px;display:flex;flex-direction:column;gap:4px}
+.task.has-p{background:color-mix(in srgb,var(--pc) 16%,var(--paper));border-color:color-mix(in srgb,var(--pc) 40%,var(--paper));border-left-color:var(--pc)}
+.task.dim{opacity:.45}
+.task .o{font-weight:700;font-size:14px;color:var(--muted)}
+.task .t{font-size:16.5px;overflow-wrap:anywhere;white-space:pre-wrap}
+.task .t.b{font-weight:700}
+.task .w{display:flex;flex-wrap:wrap;gap:5px;margin-top:2px}
+.chip{padding:1px 9px;border-radius:999px;background:var(--cc);color:var(--paper);font-size:13px;font-weight:700}
+.task.done .t,.task.done .o{text-decoration:line-through}
+.task.done .ok{font-size:12.5px;font-weight:700;color:var(--muted)}
+.empty{background:var(--paper);border:1px dashed var(--line);border-radius:8px;padding:16px;color:var(--muted)}
+.toggle{align-self:flex-start;border:1px solid var(--line);background:var(--paper);border-radius:8px;padding:7px 12px;font-weight:600;font-size:14px}
+.lev{background:var(--paper);border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.lev div{display:flex;justify-content:space-between;gap:10px;padding:9px 12px;border-top:1px solid var(--line);font-size:15px}
+.lev div:first-child{border-top:0}
+.lev span:last-child{white-space:nowrap;color:var(--muted)}
+.foot{font-size:12.5px;color:var(--muted);text-align:center}
+.install{background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:12px 14px;font-size:14.5px;display:flex;flex-direction:column;gap:6px}
+.install b{font-size:15px}
+.install button{align-self:flex-end;border:0;background:none;color:var(--muted);font-size:13px;padding:2px 0}
+</style>
+</head>
+<body>
+<header class="top"><div class="row"><img src="icon-192.png" alt=""><div><h1>Arbeidsplan</h1><div class="sub" id="upd"></div></div></div></header>
+<main class="wrap" id="app"><div class="empty">Laster planen …</div></main>
+<script id="data" type="application/json">__DATA__</script>
+<script>
+(function(){
+var D=JSON.parse(document.getElementById("data").textContent);
+var DAYS=["Mandag","Tirsdag","Onsdag","Torsdag","Fredag","Lørdag","Søndag"],MON=["jan","feb","mar","apr","mai","jun","jul","aug","sep","okt","nov","des"];
+function pad(n){return String(n).padStart(2,"0")}
+function iso(d){return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate())}
+function parse(s){var a=s.split("-").map(Number);return new Date(a[0],a[1]-1,a[2])}
+function monday(d){var x=new Date(d.getFullYear(),d.getMonth(),d.getDate());x.setDate(x.getDate()-((x.getDay()+6)%7));return x}
+function add(d,n){var x=new Date(d);x.setDate(x.getDate()+n);return x}
+function wk(d){var t=new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate()));var dn=t.getUTCDay()||7;t.setUTCDate(t.getUTCDate()+4-dn);var y=new Date(Date.UTC(t.getUTCFullYear(),0,1));return Math.ceil(((t-y)/864e5+1)/7)}
+function wkey(d){return d.getFullYear()+"-W"+pad(wk(d))}
+function short(d){return d.getDate()+". "+MON[d.getMonth()]}
+function el(tag,cls,txt){var e=document.createElement(tag);if(cls)e.className=cls;if(txt!=null)e.textContent=txt;return e}
+function get(k){try{return localStorage.getItem(k)}catch(e){return null}}
+function set(k,v){try{v==null?localStorage.removeItem(k):localStorage.setItem(k,v)}catch(e){}}
+
+var now=new Date(),TODAY=iso(now);
+var base=monday(now);if(now.getDay()===6||now.getDay()===0)base=add(base,7);
+var weeks=[0,1,2,3].map(function(i){return add(base,7*i)});
+var S={w:0,day:null,me:get("gb-me")||"",all:get("gb-all")==="1"};
+if(S.me&&D.ansatte.indexOf(S.me)<0)S.me="";
+(function(){var di=(now.getDay()+6)%7;S.day=(now.getDay()===6||now.getDay()===0)?iso(base):(di<5?TODAY:iso(base))})();
+
+function pIdx(n){n=(n||"").trim();if(!n)return -1;var f=D.farger||{};if(f[n]!=null)return f[n]%12;var i=D.ansatte.indexOf(n);return i>=0?i%12:-1}
+function pv(i){return i<0?"var(--muted)":"var(--p"+i+")"}
+function names(t){return (t.hvem||"").split(",").map(function(x){return x.trim()}).filter(Boolean)}
+function order(id){for(var i=0;i<D.ordre.length;i++)if(D.ordre[i].id===id)return D.ordre[i];return null}
+function mine(t){return !S.me||names(t).indexOf(S.me)>=0}
+function tasksOn(day){return D.oppgaver.filter(function(t){return t.dato===day})}
+
+var u=new Date(D.oppdatert);document.getElementById("upd").textContent="Oppdatert "+DAYS[(u.getDay()+6)%7].toLowerCase()+" "+short(u)+" kl. "+pad(u.getHours())+":"+pad(u.getMinutes());
+
+function render(){
+  var app=document.getElementById("app");app.innerHTML="";
+  var ws=weeks[S.w],days=[0,1,2,3,4].map(function(i){return add(ws,i)});
+
+  // hvem er du
+  if(D.ansatte.length){
+    var box=el("section");box.appendChild(el("p","lbl","Hvem er du?"));
+    var row=el("div","people");
+    [""].concat(D.ansatte).forEach(function(n){
+      var b=el("button","pp");b.type="button";b.setAttribute("aria-pressed",String(S.me===n));
+      b.style.setProperty("--cc",n?pv(pIdx(n)):"var(--ink)");
+      if(n){var d=el("span","d");b.appendChild(d)}b.appendChild(document.createTextNode(n||"Alle"));
+      b.onclick=function(){S.me=n;set("gb-me",n||null);render()};row.appendChild(b)});
+    box.appendChild(row);app.appendChild(box);
+  }
+
+  // uke
+  var nav=el("div","weeknav");var pv_=el("button",null,"‹");pv_.type="button";pv_.setAttribute("aria-label","Forrige uke");pv_.disabled=S.w===0;
+  pv_.onclick=function(){S.w--;S.day=iso(weeks[S.w]);render()};
+  var nx=el("button",null,"›");nx.type="button";nx.setAttribute("aria-label","Neste uke");nx.disabled=S.w===weeks.length-1;
+  nx.onclick=function(){S.w++;S.day=iso(weeks[S.w]);render()};
+  nav.appendChild(pv_);nav.appendChild(el("b",null,"Uke "+wk(ws)+" · "+short(days[0])+" – "+short(days[4])));nav.appendChild(nx);app.appendChild(nav);
+
+  var grid=el("div","days");
+  days.forEach(function(d){var di=iso(d);var b=el("button","day"+(di===TODAY?" today":""));b.type="button";b.setAttribute("aria-pressed",String(S.day===di));
+    b.appendChild(el("span","n",DAYS[(d.getDay()+6)%7].slice(0,3)));b.appendChild(el("span","dt",short(d)));
+    var cnt=tasksOn(di).filter(mine).length;if(cnt){var c=el("span","c",String(cnt));if(S.me)c.style.setProperty("--cc",pv(pIdx(S.me)));b.appendChild(c)}
+    b.onclick=function(){S.day=di;render()};grid.appendChild(b)});
+  app.appendChild(grid);
+
+  var note=(D.uker[wkey(ws)]||{}).tekst;
+  if(note){var n=el("section","note");n.appendChild(el("h2",null,"Beskjed"));n.appendChild(el("p",null,note));app.appendChild(n)}
+
+  var sd=parse(S.day);app.appendChild(el("h2","dayh",DAYS[(sd.getDay()+6)%7]+" "+short(sd)+(S.day===TODAY?" · i dag":"")));
+  var all=tasksOn(S.day);var show=S.me&&!S.all?all.filter(mine):all;
+  if(!all.length){app.appendChild(el("div","empty","Ingenting planlagt denne dagen."))}
+  else if(!show.length){app.appendChild(el("div","empty",S.me+" har ingen jobber denne dagen."))}
+  D.stasjoner.forEach(function(s){
+    var ts=show.filter(function(t){return t.stasjon===s.id}).sort(function(a,b){return (a.opprettet||0)-(b.opprettet||0)});
+    if(!ts.length)return;var g=el("section","grp");g.appendChild(el("h3",null,s.navn));
+    ts.forEach(function(t){var o=order(t.ordreId);var ns=names(t);var pi=pIdx(ns[0]);
+      var c=el("article","task"+(t.ferdig?" done":"")+(pi>=0?" has-p":"")+(S.me&&S.all&&!mine(t)?" dim":""));if(pi>=0)c.style.setProperty("--pc","var(--p"+pi+")");
+      if(o)c.appendChild(el("div","o",(o.nr?o.nr+" · ":"")+(o.navn||"")+(o.hva?" · "+o.hva:"")));
+      if(t.tekst)c.appendChild(el("div","t"+(o?"":" b"),t.tekst));
+      if(ns.length){var w=el("div","w");ns.forEach(function(n){var ch=el("span","chip",n);ch.style.setProperty("--cc",pv(pIdx(n)));w.appendChild(ch)});c.appendChild(w)}
+      if(t.ferdig)c.appendChild(el("div","ok","✓ Ferdig"));
+      g.appendChild(c)});
+    app.appendChild(g)});
+  if(S.me&&all.length&&all.length!==all.filter(mine).length){var tg=el("button","toggle",S.all?"Vis bare mine jobber":"Vis hele verkstedet");tg.type="button";tg.onclick=function(){S.all=!S.all;set("gb-all",S.all?"1":null);render()};app.appendChild(tg)}
+
+  var lev=D.ordre.filter(function(o){return o.levering}).sort(function(a,b){return a.levering<b.levering?-1:1});
+  if(lev.length){app.appendChild(el("p","lbl","Kommende leveranser"));var L=el("section","lev");
+    lev.forEach(function(o){var r=el("div");r.appendChild(el("span",null,(o.nr?o.nr+" · ":"")+(o.navn||"")+(o.hva?" – "+o.hva:"")));r.appendChild(el("span",null,short(parse(o.levering))));L.appendChild(r)});app.appendChild(L)}
+
+  var standalone=window.matchMedia&&window.matchMedia("(display-mode: standalone)").matches||navigator.standalone;
+  if(!standalone&&!get("gb-noinst")){var ins=el("section","install");ins.appendChild(el("b",null,"Legg planen på hjemskjermen"));
+    var ios=/iPhone|iPad|iPod/.test(navigator.userAgent);
+    ins.appendChild(el("span",null,ios?"Trykk Del-knappen i Safari (firkant med pil opp) og velg «Legg til på Hjem-skjerm».":"Trykk ⋮ øverst i Chrome og velg «Legg til på startskjermen» eller «Installer app»."));
+    var x=el("button",null,"Skjul");x.type="button";x.onclick=function(){set("gb-noinst","1");render()};ins.appendChild(x);app.appendChild(ins)}
+
+  app.appendChild(el("p","foot","Grindberg Trevarefabrikk · Kilegrend"));
+}
+render();
+document.addEventListener("visibilitychange",function(){if(document.visibilityState==="visible"&&Date.now()-now.getTime()>30*60e3)location.reload()});
+})();
+</script>
+</body>
+</html>
