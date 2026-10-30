@@ -232,6 +232,7 @@ table.board{border-collapse:collapse;width:100%;min-width:900px;table-layout:fix
     </div>
   </header>
 
+  <div class="notice err" style="font-size:15px"><b>Planen er flyttet.</b> Planlegg nå på <a href="http://plan.grindberg.no/leder/" target="_blank" rel="noopener">plan.grindberg.no/leder</a>. Der ser de ansatte endringene med en gang. Det du endrer her, vises ikke for dem lenger.</div>
   <div id="status" class="notice">Henter planen …</div>
 
   <section class="note" id="noteSec" hidden></section>
@@ -482,6 +483,14 @@ function hoursOf(oid){return S.timer.filter(x=>x.ordreId===oid)}
 function fmtH(n){return (Math.round(n*100)/100).toString().replace(".",",")+" t"}
 function sumH(list){return list.reduce((a,x)=>a+(Number(x.timer)||0),0)}
 function firstTitle(lines){for(const l of lines||[]){const t=((l.b||"").split("\n").find(x=>x.trim())||l.p||"").trim();if(t)return t.length>70?t.slice(0,68)+"…":t}return ""}
+function txBlock(o){
+  const t=o&&o.tx;if(!t)return null;
+  const dd=v=>v?short(parse(v))+" "+parse(v).getFullYear():"";
+  const rows=[["Kunde",[t.kunde,t.kundenr?"(kundenr. "+t.kundenr+")":""].filter(Boolean).join(" ")],["Telefon",t.tlf],["E-post",t.epost],["Adresse",t.kadr],["Leveringsadresse",t.levadr],["Kontaktperson",t.kontakt],["Ordredato",dd(t.odato)],["Leveringsdato",dd(t.lev)],["Referanse",t.ref],["Kontraktsref.",t.kref],["Prosjekt",t.prosjekt],["Vår kontakt",t.vaar],["Leveringskommentar",t.levkom],["Intern kommentar",t.intern]].filter(r=>r[1]);
+  return h("details",{class:"olines",open:true},h("summary",{text:"Tripletex-ordre "+(t.nr||o.nr||"")}),
+    h("dl",{class:"dlist",style:"margin:8px 0 4px"},...rows.flatMap(r=>[h("dt",{text:r[0]}),h("dd",{style:"white-space:pre-wrap",text:r[1]})])),
+    h("div",{style:"display:flex;gap:10px;align-items:center;flex-wrap:wrap"},t.url?h("a",{href:t.url,target:"_blank",rel:"noopener",class:"btn ghost",text:"Åpne i Tripletex ↗"}):null,t.hentet?h("span",{class:"hint",text:"Hentet "+dd(t.hentet)}):null));
+}
 function linesBlock(o){
   if(!o.linjer||!o.linjer.length)return null;
   return h("details",{class:"olines",open:true},h("summary",{text:"Ordrelinjer fra Tripletex ("+o.linjer.length+")"}),
@@ -500,7 +509,7 @@ function hoursBlock(o){
 async function importTx(c){
   const lev=c.lev&&c.odato&&c.lev>c.odato?c.lev:"";
   try{
-    await S.db.doc("ordre/tx"+c.tid).set({nr:c.nr,navn:c.kunde||c.nr,hva:c.ref||firstTitle(c.var),levering:lev,notat:"",status:"aktiv",linjer:c.var||[],tripletexId:c.tid,farge:nextColor(),opprettet:Date.now()});
+    await S.db.doc("ordre/tx"+c.tid).set({nr:c.nr,navn:c.kunde||c.nr,hva:c.ref||firstTitle(c.var),levering:lev,notat:"",status:"aktiv",linjer:c.var||[],tripletexId:c.tid,tx:c.tx||null,farge:nextColor(),opprettet:Date.now()});
     await S.db.doc("tripletex/"+c.id).update({importert:true});toast("Ordre "+c.nr+" er tatt inn");
   }catch(e){toast(writeErr(e))}
 }
@@ -738,6 +747,7 @@ function openOrder(o){
     h("div",{class:"f"},h("label",{for:"o-hva",text:"Hva skal lages"}),inH),
     h("div",{class:"row2"},h("div",{class:"f"},h("label",{for:"o-lev",text:"Leveringsdato"}),inL),h("div",{class:"f"},h("label",{for:"o-status",text:"Status"}),selSt)),
     h("div",{class:"f"},h("label",{for:"o-notat",text:"Notat"}),inNo),
+    o?txBlock(o):null,
     o?linesBlock(o):null,
     o?h("div",{class:"f"},h("span",{class:"lb",text:"Timer"}),hoursBlock(o)):null,
     conf,
@@ -783,7 +793,7 @@ function viewOrder(o){
     o.levering?[h("dt",{text:"Levering"}),h("dd",{text:short(parse(o.levering))+" "+parse(o.levering).getFullYear()})]:null,
     o.notat?[h("dt",{text:"Notat"}),h("dd",{text:o.notat})]:null);
   const list=ts.length?h("div",{style:"display:flex;flex-direction:column;gap:6px"},h("span",{class:"hint",text:"Planlagte jobber"}),ts.map(t=>{const d=parse(t.dato);return h("div",{class:"task"+(t.ferdig?" done":""),style:"--oc:"+oc(o)},h("div",{class:"tx"},h("span",{class:"on",text:DAYS[(d.getDay()+6)%7].slice(0,3)+" "+short(d)+" · "+stName(t.stasjon)}),t.tekst?h("span",{class:"de",text:t.tekst}):null,t.hvem?h("span",{class:"who",text:t.hvem}):null))})):null;
-  sheet(oLabel(o),h("div",{style:"display:flex;flex-direction:column;gap:14px"},dl,linesBlock(o),hoursBlock(o),list,h("div",{class:"acts"},h("div",{class:"r"},h("button",{class:"btn primary",type:"button",text:"Lukk",onclick:closeOv})))));
+  sheet(oLabel(o),h("div",{style:"display:flex;flex-direction:column;gap:14px"},dl,txBlock(o),linesBlock(o),hoursBlock(o),list,h("div",{class:"acts"},h("div",{class:"r"},h("button",{class:"btn primary",type:"button",text:"Lukk",onclick:closeOv})))));
 }
 
 function writeErr(e){
