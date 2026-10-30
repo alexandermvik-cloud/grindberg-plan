@@ -1,0 +1,1025 @@
+<!doctype html>
+<html lang="no"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="robots" content="noindex,nofollow"><link rel="icon" href="../icon-32.png"><style>.gb-login{position:fixed;inset:0;z-index:100;background:var(--bg,#eef0ec);display:grid;place-items:center;padding:16px}
+.gb-login form{background:var(--paper,#fff);border:1px solid var(--line,#d3d8d2);border-radius:12px;padding:24px;display:flex;flex-direction:column;gap:12px;width:100%;max-width:360px}
+.gb-login h1{margin:0;font-family:var(--display,sans-serif);font-size:32px}.gb-login p{margin:0;color:var(--muted,#5d6862)}.gb-login .e{color:var(--danger,#b3261e);font-weight:700}
+.gb-login input{border:1px solid var(--line,#d3d8d2);border-radius:8px;padding:12px;font:inherit;font-size:18px;background:var(--bg,#eef0ec);color:inherit}
+.gb-login button{border:0;border-radius:8px;padding:12px;font:inherit;font-weight:700;background:var(--accent,#2f5d50);color:var(--accent-ink,#fff);cursor:pointer}</style><style>body{margin:0}</style></head><body>
+<title>Produksjonsplan Grindberg</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Source+Sans+3:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: verkstedtavle — stasjoner som rader, ukedager som kolonner; leveranser i egen stripe. Telefon: dag for dag. */
+:root{
+  --bg:#eef0ec; --paper:#ffffff; --ink:#1d2320; --muted:#5d6862; --line:#d3d8d2; --soft:#e4e8e2;
+  --signal:#f2c230; --signal-ink:#3a2f00; --accent:#2f5d50; --accent-ink:#ffffff;
+  --danger:#b3261e; --danger-bg:#fbe9e7; --warn:#8a5a00; --warn-bg:#fdf1d6; --ok:#2e6b3a; --ok-bg:#e3f1e5;
+  --o0:#2f6fb3; --o1:#c2571a; --o2:#2e8a57; --o3:#8a3fa8; --o4:#b8872a; --o5:#c23b6b; --o6:#3a8f9a; --o7:#6b6f2a;
+  --p0:#2f6fb3; --p1:#d0661f; --p2:#2e8a57; --p3:#8a3fa8; --p4:#9a7a00; --p5:#c23b6b; --p6:#2a8f9c; --p7:#8a5a3a; --p8:#c0392b; --p9:#66707a; --p10:#6b7a1f; --p11:#2c3e8f;
+  --display:"Barlow Condensed","Arial Narrow",Arial,sans-serif;
+  --body:"Source Sans 3","Segoe UI",system-ui,sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#151917; --paper:#1e2421; --ink:#e7ece8; --muted:#9aa59f; --line:#333c37; --soft:#262d29;
+  --signal:#e0b52c; --signal-ink:#2a2200; --accent:#6fb39f; --accent-ink:#0f1d18;
+  --danger:#ff8a80; --danger-bg:#3a1d1b; --warn:#f0c060; --warn-bg:#33290f; --ok:#8fd19c; --ok-bg:#1b3121;
+  --o0:#6aa7e8; --o1:#f08a4b; --o2:#5cc48a; --o3:#c084e0; --o4:#e0b85a; --o5:#ef7aa3; --o6:#6cc6d1; --o7:#b8bd5c;
+  --p0:#6aa7e8; --p1:#f08a4b; --p2:#5cc48a; --p3:#c084e0; --p4:#e6c445; --p5:#ef7aa3; --p6:#62c6d3; --p7:#c99a78; --p8:#f07a6c; --p9:#a3acb5; --p10:#b5c45a; --p11:#8a9cf0;
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#151917; --paper:#1e2421; --ink:#e7ece8; --muted:#9aa59f; --line:#333c37; --soft:#262d29;
+  --signal:#e0b52c; --signal-ink:#2a2200; --accent:#6fb39f; --accent-ink:#0f1d18;
+  --danger:#ff8a80; --danger-bg:#3a1d1b; --warn:#f0c060; --warn-bg:#33290f; --ok:#8fd19c; --ok-bg:#1b3121;
+  --o0:#6aa7e8; --o1:#f08a4b; --o2:#5cc48a; --o3:#c084e0; --o4:#e0b85a; --o5:#ef7aa3; --o6:#6cc6d1; --o7:#b8bd5c;
+  --p0:#6aa7e8; --p1:#f08a4b; --p2:#5cc48a; --p3:#c084e0; --p4:#e6c445; --p5:#ef7aa3; --p6:#62c6d3; --p7:#c99a78; --p8:#f07a6c; --p9:#a3acb5; --p10:#b5c45a; --p11:#8a9cf0;
+  color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.45}
+.wrap{max-width:1280px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:18px 48px;display:flex;flex-direction:column;gap:18px}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+header.top{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px 20px}
+.brand{display:flex;flex-direction:column;gap:2px;min-width:0}
+.brand small{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.brand h1{margin:0;font-family:var(--display);font-weight:700;font-size:clamp(30px,5vw,44px);line-height:1;text-wrap:balance}
+.brand h1 .wk{display:inline-block;background:var(--signal);color:var(--signal-ink);padding:0 .25em;margin-left:.15em;border-radius:3px}
+.brand .range{font-family:var(--mono);font-size:13px;color:var(--muted)}
+.toolbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.btn{border:1px solid var(--line);background:var(--paper);border-radius:6px;padding:7px 12px;font-weight:600;font-size:14px;display:inline-flex;align-items:center;gap:6px;min-height:38px}
+.btn:hover{border-color:var(--muted)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.danger{color:var(--danger);border-color:var(--danger)}
+.btn.ghost{background:transparent}
+.btn[disabled]{opacity:.5;cursor:default}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:6px;overflow:hidden;background:var(--paper)}
+.seg button{border:0;background:transparent;padding:7px 12px;font-weight:600;font-size:14px;min-height:38px}
+.seg button+button{border-left:1px solid var(--line)}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
+
+.notice{border:1px solid var(--line);background:var(--paper);border-radius:6px;padding:10px 14px;color:var(--muted);font-size:14px}
+.notice.err{border-color:var(--danger);color:var(--danger);background:var(--danger-bg)}
+
+/* Leveranser-stripe */
+.deliveries{display:flex;flex-direction:column;gap:8px}
+.sec-h{display:flex;align-items:baseline;justify-content:space-between;gap:12px}
+.sec-h h2{margin:0;font-family:var(--display);font-size:22px;font-weight:600;letter-spacing:.02em}
+.sec-h span{font-size:13px;color:var(--muted)}
+.dl-row{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px}
+.dl{flex:0 0 auto;min-width:170px;max-width:240px;background:var(--paper);border:1px solid var(--line);border-left:5px solid var(--oc);border-radius:6px;padding:8px 10px;display:flex;flex-direction:column;gap:2px;text-align:left}
+.dl b{font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dl .what{font-size:13px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dl .when{font-family:var(--mono);font-size:12px}
+.pill{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;padding:1px 6px;border-radius:999px;background:var(--soft);color:var(--muted)}
+.pill.late{background:var(--danger-bg);color:var(--danger)}
+.pill.soon{background:var(--warn-bg);color:var(--warn)}
+.pill.ok{background:var(--ok-bg);color:var(--ok)}
+
+/* Ukegrid */
+.board-scroll{overflow-x:auto;border:1px solid var(--line);border-radius:8px;background:var(--paper)}
+table.board{border-collapse:collapse;width:100%;min-width:900px;table-layout:fixed}
+.board th,.board td{border-bottom:1px solid var(--line);border-right:1px solid var(--line);vertical-align:top;padding:0}
+.board tr>*:last-child{border-right:0}
+.board tbody tr:last-child>*{border-bottom:0}
+.board thead th{padding:8px 10px;text-align:left;background:var(--soft);font-weight:600}
+.board thead th .dn{font-family:var(--display);font-size:19px;font-weight:600;display:block;line-height:1.1}
+.board thead th .dd{font-family:var(--mono);font-size:12px;color:var(--muted)}
+.board thead th.today{background:var(--signal);color:var(--signal-ink)}
+.board thead th.today .dd{color:var(--signal-ink)}
+.board th.st{width:130px;padding:10px;text-align:left;background:var(--soft);font-family:var(--display);font-size:18px;font-weight:600;letter-spacing:.02em}
+.board td.today{background:color-mix(in srgb,var(--signal) 8%,var(--paper))}
+.cell{display:flex;flex-direction:column;gap:6px;padding:6px;min-height:74px}
+.add{border:1px dashed var(--line);background:transparent;border-radius:5px;color:var(--muted);font-size:13px;padding:4px;min-height:30px;opacity:.75}
+.add:hover{opacity:1;border-color:var(--muted);color:var(--ink)}
+
+.task{--pc:var(--line);display:flex;gap:8px;align-items:flex-start;background:var(--bg);border:1px solid var(--line);border-left:5px solid var(--pc);border-radius:5px;padding:6px 8px;text-align:left;width:100%;min-width:0}
+.task .tx{display:flex;flex-direction:column;min-width:0;flex:1}
+.task .on{font-weight:700;font-size:13.5px;line-height:1.25;overflow-wrap:anywhere}
+.task .de{font-size:13px;line-height:1.3;overflow-wrap:anywhere}
+.awayrow th,.awayrow td{background:color-mix(in srgb,var(--danger) 5%,var(--paper))}
+.cell.aw{min-height:44px;flex-direction:row;flex-wrap:wrap;align-items:flex-start;gap:5px}
+.cell.aw .add{flex:1 0 100%}
+.away{display:inline-flex;align-items:center;gap:4px;border:1px solid var(--line);background:var(--paper);border-radius:999px;padding:2px 8px 2px 2px;font-size:12px;color:var(--muted);max-width:100%}
+.away .at{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.prow th.st{background:color-mix(in srgb,var(--pc) 14%,var(--soft))}
+.pdot{display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--pc);margin-right:7px;vertical-align:1px}
+.board td.isaway{background:repeating-linear-gradient(135deg,color-mix(in srgb,var(--danger) 7%,var(--paper)) 0 8px,var(--paper) 8px 16px)}
+.stl{display:inline-block;padding:0 7px;border-radius:4px;background:var(--soft);color:var(--ink);font-size:11.5px;font-weight:700;line-height:18px;border:1px solid var(--line)}
+.med{font-size:11.5px;color:var(--muted);line-height:18px}
+.olines{border:1px solid var(--line);border-radius:8px;padding:8px 10px;background:var(--bg)}
+.olines summary{cursor:pointer;font-weight:700;font-size:14px}
+.ol{display:flex;flex-direction:column;gap:8px;margin-top:8px;max-height:320px;overflow:auto}
+.oli{display:grid;grid-template-columns:42px 1fr;gap:8px;font-size:13.5px}
+.oli .q{font-family:var(--mono);color:var(--muted);text-align:right}
+.lb2{white-space:pre-wrap;overflow-wrap:anywhere}
+.hblock{display:flex;flex-direction:column;gap:8px}
+.hsum{display:flex;flex-direction:column;gap:6px}
+.hper{display:flex;flex-wrap:wrap;gap:5px}
+.hblock summary{cursor:pointer;font-size:13.5px;color:var(--muted)}
+.hlist{display:flex;flex-direction:column;margin-top:6px}
+.hrow{display:grid;grid-template-columns:62px 1fr 56px minmax(0,2fr) 36px;gap:8px;align-items:center;font-size:13.5px;padding:4px 0;border-top:1px solid var(--line)}
+.hrow .hk{color:var(--muted);overflow-wrap:anywhere}
+.txrow{display:flex;gap:10px;align-items:center;padding:10px 14px;border-top:1px solid var(--line)}
+.txrow:first-child{border-top:0}
+.txrow .mid{flex:1;min-width:0;display:flex;flex-direction:column}
+.txrow .mid span{font-size:13px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.txa{display:flex;gap:6px;flex:0 0 auto}
+.task.has-p{background:color-mix(in srgb,var(--pc) 20%,var(--paper));border-color:color-mix(in srgb,var(--pc) 45%,var(--paper));border-left-color:var(--pc)}
+.task .who{font-size:12px;color:var(--muted);font-weight:600;display:flex;flex-wrap:wrap;gap:4px;margin-top:2px}
+.chip{display:inline-block;padding:0 7px;border-radius:999px;background:var(--cc);color:var(--paper);font-size:11.5px;font-weight:700;line-height:18px}
+.osq{display:inline-block;width:9px;height:9px;border-radius:2px;background:var(--oc);margin-right:5px;vertical-align:1px}
+.cs{display:inline-block;width:22px;height:22px;border-radius:5px;background:var(--cc);flex:0 0 auto;border:1px solid var(--line)}
+.strow select{border:1px solid var(--line);border-radius:6px;padding:6px 8px;background:var(--bg);min-height:38px}
+.daypick label .chipdot{width:10px;height:10px;border-radius:50%;background:var(--cc);display:inline-block}
+.task.done{opacity:.55}
+.task.done .on,.task.done .de{text-decoration:line-through}
+.chk{flex:0 0 auto;width:20px;height:20px;border:1.5px solid var(--muted);border-radius:4px;background:var(--paper);display:grid;place-items:center;padding:0;margin-top:1px}
+.chk[aria-checked="true"]{background:var(--ok);border-color:var(--ok);color:var(--paper)}
+.chk svg{width:13px;height:13px}
+.task .body{flex:1;min-width:0;background:none;border:0;padding:0;text-align:left;display:flex;flex-direction:column}
+
+/* Dag for dag (telefon) */
+.days{display:none;flex-direction:column;gap:14px}
+.day{background:var(--paper);border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.day>h3{margin:0;padding:8px 12px;background:var(--soft);display:flex;justify-content:space-between;align-items:baseline;font-family:var(--display);font-size:20px;font-weight:600}
+.day>h3 span{font-family:var(--mono);font-size:12px;color:var(--muted);font-weight:400}
+.day.today>h3{background:var(--signal);color:var(--signal-ink)}
+.day.today>h3 span{color:var(--signal-ink)}
+.day .grp{padding:8px 12px;display:flex;flex-direction:column;gap:6px;border-top:1px solid var(--line)}
+.day .grp:first-of-type{border-top:0}
+.day .grp h4{margin:0;font-size:12px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted)}
+.day .empty{padding:10px 12px;color:var(--muted);font-size:14px}
+.day .foot{padding:8px 12px;border-top:1px solid var(--line)}
+@media (max-width:760px){.board-scroll{display:none}.days{display:flex}}
+
+/* Ordre */
+.list{display:flex;flex-direction:column;background:var(--paper);border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.orow{display:grid;grid-template-columns:6px 1fr auto;gap:12px;align-items:center;padding:10px 14px 10px 0;border-top:1px solid var(--line);text-align:left;background:none;border-left:0;border-right:0;border-bottom:0;width:100%}
+.orow:first-child{border-top:0}
+.orow .sw{align-self:stretch;background:var(--oc)}
+.orow .mid{min-width:0;display:flex;flex-direction:column}
+.orow .mid b{font-size:16px}
+.orow .mid span{font-size:13px;color:var(--muted);overflow-wrap:anywhere}
+.orow .rt{display:flex;flex-direction:column;align-items:flex-end;gap:3px;font-family:var(--mono);font-size:12px}
+.orow.levert{opacity:.6}
+.empty-state{background:var(--paper);border:1px dashed var(--line);border-radius:8px;padding:22px;display:flex;flex-direction:column;gap:8px;align-items:flex-start}
+.empty-state h3{margin:0;font-family:var(--display);font-size:22px;font-weight:600}
+.empty-state p{margin:0;color:var(--muted);max-width:60ch}
+
+/* Stasjoner */
+.strow{display:flex;gap:8px;align-items:center;padding:8px 12px;border-top:1px solid var(--line)}
+.strow:first-child{border-top:0}
+.strow input{flex:1;min-width:0}
+.icon-btn{border:1px solid var(--line);background:var(--paper);border-radius:5px;width:36px;height:36px;display:grid;place-items:center;padding:0;font-size:15px}
+
+/* Skjema / ark */
+.ov{position:fixed;inset:0;background:color-mix(in srgb,var(--ink) 45%,transparent);display:flex;align-items:flex-end;justify-content:center;z-index:50;padding:0 env(safe-area-inset-right,0px) 0 env(safe-area-inset-left,0px)}
+@media (min-width:700px){.ov{align-items:center}}
+.sheet{background:var(--paper);width:100%;max-width:520px;max-height:92vh;overflow:auto;border-radius:12px 12px 0 0;padding:18px 18px calc(18px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:14px}
+@media (min-width:700px){.sheet{border-radius:12px}}
+.sheet h2{margin:0;font-family:var(--display);font-size:26px;font-weight:600}
+.f{display:flex;flex-direction:column;gap:4px}
+.f label,.f .lb{font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.f input,.f select,.f textarea{border:1px solid var(--line);background:var(--bg);border-radius:6px;padding:8px 10px;min-height:40px;width:100%}
+.f textarea{min-height:64px;resize:vertical}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media (max-width:420px){.row2{grid-template-columns:1fr}}
+.daypick{display:flex;flex-wrap:wrap;gap:6px}
+.daypick label{display:inline-flex;align-items:center;gap:5px;border:1px solid var(--line);border-radius:6px;padding:6px 9px;font-size:14px;text-transform:none;letter-spacing:0;color:var(--ink);font-weight:600;cursor:pointer}
+.daypick input{width:auto;min-height:0}
+.acts{display:flex;flex-wrap:wrap;gap:8px;justify-content:space-between;align-items:center}
+.acts .r{display:flex;gap:8px;margin-left:auto}
+.confirm{display:flex;flex-wrap:wrap;align-items:center;gap:8px;background:var(--danger-bg);color:var(--danger);border-radius:6px;padding:8px 10px;font-size:14px;font-weight:600}
+.hint{font-size:13px;color:var(--muted)}
+.foot-note{font-size:13px;color:var(--muted);display:flex;flex-wrap:wrap;gap:6px 16px}
+.note{background:var(--paper);border:1px solid var(--line);border-left:5px solid var(--signal);border-radius:8px;padding:12px 14px;display:flex;flex-direction:column;gap:8px}
+.note h2{margin:0;font-family:var(--display);font-size:20px;font-weight:600}
+.note .txt{white-space:pre-wrap;overflow-wrap:anywhere;font-size:15.5px}
+.note textarea{border:1px solid var(--line);background:var(--bg);border-radius:6px;padding:8px 10px;min-height:70px;width:100%;resize:vertical}
+.note .acts{justify-content:flex-end}
+.nr{font-family:var(--mono);font-size:.85em;font-weight:500;color:var(--muted)}
+.newo{border:1px dashed var(--accent);border-radius:8px;padding:10px;display:flex;flex-direction:column;gap:10px;background:color-mix(in srgb,var(--accent) 6%,var(--paper))}
+.dlist{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;margin:0}
+.dlist dt{font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding-top:2px}
+.dlist dd{margin:0;white-space:pre-wrap;overflow-wrap:anywhere}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(18px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--paper);padding:9px 16px;border-radius:6px;font-weight:600;z-index:60;font-size:14px}
+@media (prefers-reduced-motion:no-preference){.sheet{animation:up .18s ease-out}@keyframes up{from{transform:translateY(16px);opacity:.6}to{transform:none;opacity:1}}}
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <div class="brand">
+      <small>Grindberg Trevarefabrikk</small>
+      <h1>Produksjonsplan <span class="wk" id="wkNo">Uke –</span></h1>
+      <div class="range" id="wkRange"></div>
+    </div>
+    <div class="toolbar">
+      <div class="seg" role="group" aria-label="Velg uke">
+        <button id="prevWk" type="button" aria-label="Forrige uke">‹</button>
+        <button id="thisWk" type="button">Denne uka</button>
+        <button id="nextWk" type="button" aria-label="Neste uke">›</button>
+      </div>
+      <div class="seg" role="group" aria-label="Visning">
+        <button id="vUke" type="button" aria-pressed="true">Uke</button>
+        <button id="vOrdre" type="button" aria-pressed="false">Ordre</button>
+        <button id="vSt" type="button" aria-pressed="false">Oppsett</button>
+      </div>
+      <div class="seg" role="group" aria-label="Rader"><button id="rAns" type="button">Ansatte</button><button id="rSt" type="button">Stasjoner</button></div>
+      <button id="printBtn" class="btn" type="button" hidden>Last ned for utskrift</button>
+      <button id="excelBtn" class="btn" type="button" hidden>Excel</button>
+    </div>
+  </header>
+
+  <div id="status" class="notice">Henter planen …</div>
+
+  <section class="note" id="noteSec" hidden></section>
+
+  <section class="deliveries" id="delivSec" hidden>
+    <div class="sec-h"><h2>Kommende leveranser</h2><span id="delivCount"></span></div>
+    <div class="dl-row" id="delivRow"></div>
+  </section>
+
+  <main id="main"></main>
+
+  <div class="foot-note" id="footNote"></div>
+</div>
+
+<div id="ovRoot"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"></script>
+<script>
+/* Kobler planleggeren til serveren på grindberg-plan.grindberg.workers.dev.
+   Etterligner det lille database-grensesnittet planleggeren bruker (doc/collection/onSnapshot/set/update/delete/add),
+   og henter endringer fra serveren hvert 5. sekund, så alt er levende. */
+(function(){
+  var API="https://grindberg-plan.grindberg.workers.dev/api/";
+  var KEY="gb-lederkode";
+  function getCode(){try{return localStorage.getItem(KEY)||""}catch(e){return ""}}
+  function setCode(c){try{c?localStorage.setItem(KEY,c):localStorage.removeItem(KEY)}catch(e){}}
+  var code=getCode(),me=null,store={},ver=null,docL=[],colL=[],timer=null;
+
+  function req(method,path,body){
+    return fetch(API+path,{method:method,headers:Object.assign({"x-kode":code},body?{"content-type":"application/json"}:{}),body:body?JSON.stringify(body):undefined})
+      .then(function(r){return r.json().then(function(j){if(!r.ok){var e=new Error(j.error||"feil");e.code=r.status===401?"revoked":(r.status===403?"invalid_argument":"unavailable");e.status=r.status;throw e}return j})});
+  }
+  function snapDoc(coll,id){var d=store[coll]&&store[coll][id];return {id:id,exists:!!d,data:function(){return d?JSON.parse(JSON.stringify(d)):undefined},metadata:{fromCache:false,hasPendingWrites:false}}}
+  function snapColl(coll){var o=store[coll]||{};var docs=Object.keys(o).sort().map(function(id){return snapDoc(coll,id)});return {docs:docs,size:docs.length,empty:!docs.length,docChanges:function(){return []},metadata:{fromCache:false,hasPendingWrites:false}}}
+  function notify(){docL.forEach(function(l){try{l.cb(snapDoc(l.coll,l.id))}catch(e){console.error(e)}});colL.forEach(function(l){try{l.cb(snapColl(l.coll))}catch(e){console.error(e)}})}
+  function pull(force){
+    return req("GET","data"+(ver!=null&&!force?"?v="+ver:"")).then(function(j){if(j.same)return;store=j.docs||{};ver=j.v;notify()})
+      .catch(function(e){if(e.status===401){setCode("");location.reload()}});
+  }
+  function split(path){var p=path.split("/");return {coll:p[0],id:p[1]}}
+  function local(coll,id,data){store[coll]=store[coll]||{};if(data===null)delete store[coll][id];else store[coll][id]=data;notify()}
+  function docRef(path){var p=split(path);return {
+    id:p.id,path:path,
+    get:function(){return Promise.resolve(snapDoc(p.coll,p.id))},
+    set:function(d){local(p.coll,p.id,JSON.parse(JSON.stringify(d)));return req("PUT","doc/"+p.coll+"/"+encodeURIComponent(p.id),d).then(function(){pull(true)})},
+    update:function(d){var cur=(store[p.coll]||{})[p.id];if(cur)local(p.coll,p.id,Object.assign({},cur,d));return req("PATCH","doc/"+p.coll+"/"+encodeURIComponent(p.id),d).then(function(){pull(true)})},
+    delete:function(){local(p.coll,p.id,null);return req("DELETE","doc/"+p.coll+"/"+encodeURIComponent(p.id)).then(function(){pull(true)})},
+    onSnapshot:function(cb){var l={coll:p.coll,id:p.id,cb:cb};docL.push(l);if(ver!=null)setTimeout(function(){cb(snapDoc(p.coll,p.id))},0);return function(){docL=docL.filter(function(x){return x!==l})}}
+  }}
+  function collRef(coll){return {
+    path:coll,
+    doc:function(id){return docRef(coll+"/"+(id||("c"+Date.now().toString(36)+Math.random().toString(36).slice(2,8))))},
+    add:function(d){return req("POST","doc/"+coll,d).then(function(j){local(coll,j.id,JSON.parse(JSON.stringify(d)));pull(true);return docRef(coll+"/"+j.id)})},
+    onSnapshot:function(cb){var l={coll:coll,cb:cb};colL.push(l);if(ver!=null)setTimeout(function(){cb(snapColl(coll))},0);return function(){colL=colL.filter(function(x){return x!==l})}},
+    get:function(){return Promise.resolve(snapColl(coll))}
+  }}
+  var db={doc:docRef,collection:collRef};
+
+  function loginScreen(msg){
+    return new Promise(function(resolve){
+      var ov=document.createElement("div");ov.className="gb-login";
+      ov.innerHTML='<form><h1>Produksjonsplan</h1><p>Logg inn med lederkoden din.</p><p class="e"></p><input id="gb-kode" type="password" autocomplete="current-password" placeholder="Lederkode" aria-label="Lederkode"><button type="submit">Logg inn</button></form>';
+      document.body.appendChild(ov);var f=ov.querySelector("form"),i=ov.querySelector("input"),e=ov.querySelector(".e");if(msg)e.textContent=msg;setTimeout(function(){i.focus()},50);
+      f.onsubmit=function(ev){ev.preventDefault();code=i.value.trim();req("POST","login").then(function(j){if(j.role!=="leder"){e.textContent="Dette er koden for ansatte. Bruk lederkoden.";return}setCode(code);me=j;ov.remove();resolve()}).catch(function(){e.textContent="Feil kode. Prøv igjen."})};
+    });
+  }
+  var ready=(code?req("POST","login").then(function(j){if(j.role!=="leder")throw 0;me=j}).catch(function(){setCode("");return loginScreen("Logg inn på nytt.")}):loginScreen())
+    .then(function(){return pull(true)}).then(function(){timer=setInterval(function(){if(document.visibilityState==="visible")pull(false)},5000);document.addEventListener("visibilitychange",function(){if(document.visibilityState==="visible")pull(false)})});
+
+  var user={isOwner:function(){return Promise.resolve(true)},canEdit:function(){return Promise.resolve(true)},can:function(){return Promise.resolve(true)},
+    id:function(){return Promise.resolve(me&&me.navn||null)},me:function(){return Promise.resolve({id:me&&me.navn,name:me&&me.navn||"",isOwner:true,canEdit:true,email:null,avatarUrl:"",color:"#666"})},profiles:function(){return Promise.resolve({})}};
+  var downloads={save:function(o){var b=o.data instanceof Blob?o.data:new Blob([o.data]);var u=URL.createObjectURL(b);var a=document.createElement("a");a.href=u;a.download=o.filename;document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(u);a.remove()},2000);return Promise.resolve({status:"saved"})}};
+  window.gbLogout=function(){setCode("");location.reload()};
+  window.gbMe=function(){return me};
+  window.claude={use:function(name){return ready.then(function(){if(name==="db")return db;if(name==="user")return user;if(name==="downloads")return downloads;return null})}};
+})();
+
+</script>
+<script>
+(function(){
+const DAYS=["Mandag","Tirsdag","Onsdag","Torsdag","Fredag","Lørdag","Søndag"];
+const MONTHS=["jan","feb","mar","apr","mai","jun","jul","aug","sep","okt","nov","des"];
+const DEFAULT_ST=[{id:"cnc",navn:"CNC"},{id:"kant",navn:"Kantliming"},{id:"mont",navn:"Montering"},{id:"lakk",navn:"Lakk"},{id:"lev",navn:"Pakking / levering"}];
+const S={db:null,user:null,dl:null,canWrite:false,st:null,stLoaded:false,ordre:[],oppg:[],oLoaded:false,tLoaded:false,uker:{},fravaer:[],timer:[],tripletex:[],visSkjulte:false,tilgang:null,noteEdit:false,week:monday(new Date()),view:"uke",err:""};
+
+/* ---------- datohjelp ---------- */
+function pad(n){return String(n).padStart(2,"0")}
+function iso(d){return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate())}
+function parse(s){const [y,m,d]=s.split("-").map(Number);return new Date(y,m-1,d)}
+function monday(d){const x=new Date(d.getFullYear(),d.getMonth(),d.getDate());const wd=(x.getDay()+6)%7;x.setDate(x.getDate()-wd);return x}
+function addDays(d,n){const x=new Date(d);x.setDate(x.getDate()+n);return x}
+function isoWeek(d){const t=new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate()));const day=t.getUTCDay()||7;t.setUTCDate(t.getUTCDate()+4-day);const y0=new Date(Date.UTC(t.getUTCFullYear(),0,1));return Math.ceil(((t-y0)/864e5+1)/7)}
+function short(d){return d.getDate()+". "+MONTHS[d.getMonth()]}
+function daysBetween(a,b){return Math.round((parse(iso(b))-parse(iso(a)))/864e5)}
+const TODAY=iso(new Date());
+
+/* ---------- DOM-hjelp ---------- */
+function h(tag,attrs,...kids){const e=document.createElement(tag);if(attrs)for(const k in attrs){const v=attrs[k];if(v==null||v===false)continue;if(k==="class")e.className=v;else if(k==="text")e.textContent=v;else if(k==="style")e.setAttribute("style",v);else if(k.startsWith("on"))e.addEventListener(k.slice(2),v);else e.setAttribute(k,v===true?"":v)}for(const c of kids.flat()){if(c==null||c===false)continue;e.append(c.nodeType?c:document.createTextNode(String(c)))}return e}
+function oc(o){return o?"var(--o"+((o.farge!=null?o.farge:7)%8)+")":"var(--muted)"}
+const $=id=>document.getElementById(id);
+let toastT;function toast(msg){const old=document.querySelector(".toast");if(old)old.remove();const t=h("div",{class:"toast",role:"status",text:msg});document.body.append(t);clearTimeout(toastT);toastT=setTimeout(()=>t.remove(),2400)}
+const CHECK='<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M3 8.5l3.2 3L13 4.5"/></svg>';
+
+function weekKey(d){const t=new Date(d);t.setDate(t.getDate()+3);return t.getFullYear()+"-W"+pad(isoWeek(d))}
+function oLabel(o){return o?((o.nr?o.nr+" · ":"")+(o.navn||"Uten navn")):""}
+function stations(){return (S.st&&S.st.length)?S.st:DEFAULT_ST}
+function orderById(id){return S.ordre.find(o=>o.id===id)}
+function weekDays(){const n=5;return Array.from({length:n},(_,i)=>addDays(S.week,i))}
+
+/* ---------- toppfelt ---------- */
+function renderHead(){
+  const days=weekDays();
+  $("wkNo").textContent="Uke "+isoWeek(S.week);
+  $("wkRange").textContent=short(days[0])+" – "+short(days[days.length-1])+" "+days[days.length-1].getFullYear();
+  $("vUke").setAttribute("aria-pressed",S.view==="uke");
+  $("vOrdre").setAttribute("aria-pressed",S.view==="ordre");
+  $("vSt").setAttribute("aria-pressed",S.view==="st");
+  $("vSt").hidden=!S.canWrite;
+  $("rAns").setAttribute("aria-pressed",rowMode()==="ansatte");$("rSt").setAttribute("aria-pressed",rowMode()==="stasjoner");$("rAns").parentNode.hidden=S.view!=="uke";
+  $("printBtn").hidden=!S.dl;
+  const canSync=S.isOwner&&S.mcp&&S.excel&&S.excel.driveId;
+  $("excelBtn").hidden=!(canSync||(S.dl&&S.canWrite));
+  $("excelBtn").textContent=canSync?(syncing?"Sender …":"Oppdater Excel"):"Last ned Excel";
+  $("excelBtn").disabled=syncing;
+  const st=$("status");
+  if(S.err){st.className="notice err";st.textContent=S.err;st.hidden=false}
+  else if(!S.db){st.className="notice";st.textContent="Planen kobles til …";st.hidden=false}
+  else if(!(S.oLoaded&&S.tLoaded)){st.className="notice";st.textContent="Henter planen …";st.hidden=false}
+  else st.hidden=true;
+  const foot=$("footNote");foot.replaceChildren(
+    h("span",{text:S.canWrite?"Innlogget som "+((window.gbMe&&window.gbMe()||{}).navn||"leder")+". Endringer vises med en gang for alle som har planen eller appen åpen.":"Visning. Planen oppdateres av seg selv når noe endres."}),
+    h("span",{text:"Utskrift: «Last ned for utskrift» lager en A4-fil som åpnes og skrives ut fra nettleseren."}),h("button",{class:"btn ghost",type:"button",style:"min-height:0;padding:2px 8px",text:"Logg ut",onclick:()=>window.gbLogout()})
+  );
+}
+
+/* ---------- leveranser ---------- */
+function renderDeliveries(){
+  const act=S.ordre.filter(o=>o.status!=="levert"&&o.levering).sort((a,b)=>a.levering.localeCompare(b.levering));
+  $("delivSec").hidden=!act.length||S.view==="st";
+  $("delivCount").textContent=act.length?act.length+" aktive ordre":"";
+  $("delivRow").replaceChildren(...act.map(o=>{
+    const n=daysBetween(new Date(),parse(o.levering));
+    return h("button",{class:"dl",type:"button",style:"--oc:"+oc(o),onclick:()=>S.canWrite?openOrder(o):viewOrder(o)},
+      h("b",null,o.nr?h("span",{class:"nr",text:o.nr+" "}):null,o.navn||"Uten navn"),
+      o.hva?h("span",{class:"what",text:o.hva}):null,
+      h("span",{class:"when"},short(parse(o.levering))+" ",dueTag(n)));
+  }));
+}
+function renderNote(){
+  const sec=$("noteSec");const key=weekKey(S.week);const txt=(S.uker[key]&&S.uker[key].tekst)||"";
+  if(S.view==="st"||(!txt&&!S.canWrite)){sec.hidden=true;return}
+  sec.hidden=false;
+  const title=h("h2",{text:"Beskjed til verkstedet · uke "+isoWeek(S.week)});
+  if(S.canWrite&&S.noteEdit){S.noteKey=key;
+    const ta=h("textarea",{id:"note-tekst",placeholder:"F.eks. «Uldal-kjøkkenet har første prioritet. Lakk står fredag pga. service.»"});ta.value=txt;
+    sec.replaceChildren(title,ta,h("div",{class:"acts"},h("div",{class:"r"},
+      h("button",{class:"btn",type:"button",text:"Avbryt",onclick:()=>{S.noteEdit=false;renderNote()}}),
+      h("button",{class:"btn primary",type:"button",text:"Lagre beskjed",onclick:async()=>{
+        try{await S.db.doc("uker/"+key).set({tekst:ta.value.trim(),endret:Date.now()});S.noteEdit=false;renderNote();toast("Beskjed lagret")}catch(e){toast(writeErr(e))}}}))));
+    setTimeout(()=>ta.focus(),20);
+  }else if(txt){
+    sec.replaceChildren(title,h("div",{class:"txt",text:txt}),S.canWrite?h("div",{class:"acts"},h("div",{class:"r"},h("button",{class:"btn ghost",type:"button",text:"Endre beskjed",onclick:()=>{S.noteEdit=true;renderNote()}}))):null);
+  }else{
+    sec.replaceChildren(title,h("p",{class:"hint",style:"margin:0",text:"Skriv prioriteringer, endringer eller annet alle bør vite denne uka."}),
+      h("div",{class:"acts"},h("div",{class:"r"},h("button",{class:"btn",type:"button",text:"+ Skriv beskjed",onclick:()=>{S.noteEdit=true;renderNote()}}))));
+  }
+}
+function dueTag(n){
+  if(n<0)return h("span",{class:"pill late",text:Math.abs(n)+" d over"});
+  if(n===0)return h("span",{class:"pill late",text:"i dag"});
+  if(n<=7)return h("span",{class:"pill soon",text:"om "+n+" d"});
+  return h("span",{class:"pill ok",text:"om "+n+" d"});
+}
+
+/* ---------- oppgavekort ---------- */
+function stName2(id){const x=stations().find(z=>z.id===id);return x?x.navn:""}
+function taskCard(t,ctx){
+  ctx=ctx||{};const o=orderById(t.ordreId);const ns=names(t);
+  const chk=h("button",{class:"chk",type:"button",role:"checkbox","aria-checked":!!t.ferdig,"aria-label":t.ferdig?"Merk som ikke ferdig":"Merk som ferdig",disabled:!S.canWrite||null,onclick:e=>{e.stopPropagation();toggleDone(t)}});
+  if(t.ferdig)chk.innerHTML=CHECK;
+  const others=ctx.person?ns.filter(n=>n!==ctx.person):ns;
+  const sn=ctx.person?stName2(t.stasjon):"";
+  const body=h("button",{class:"body",type:"button",onclick:()=>S.canWrite?openTask(t):viewTask(t)},
+    o?h("span",{class:"on"},h("span",{class:"osq"}),o.nr?h("span",{class:"nr",text:o.nr+" "}):null,o.navn||""):null,
+    t.tekst?h("span",{class:o?"de":"on",text:t.tekst}):null,
+    (sn||others.length)?h("span",{class:"who"},sn?h("span",{class:"stl",text:sn}):null,ctx.person&&others.length?h("span",{class:"med",text:"med"}):null,others.map(n=>h("span",{class:"chip",style:"--cc:"+pVar(pIdx(n)),text:n}))):null);
+  const pi=ctx.person?pIdx(ctx.person):pIdx(ns[0]);
+  return h("div",{class:"task"+(t.ferdig?" done":"")+(pi>=0?" has-p":""),style:"--oc:"+oc(o)+(pi>=0?";--pc:var(--p"+pi+")":"")},chk,body);
+}
+const FTYPER=["Syk","Egenmelding","Sykt barn","Ferie / fri","Lege / tannlege","Kurs","Annet"];
+function awayOn(day){return S.fravaer.filter(f=>f.fra&&f.fra<=day&&(f.til||f.fra)>=day).sort((a,b)=>(a.hvem||"").localeCompare(b.hvem||"","nb"))}
+function awayChip(f){const pi=pIdx(f.hvem);return h("button",{class:"away",type:"button",style:"--cc:"+pVar(pi),title:(f.type||"")+(f.notat?" – "+f.notat:""),onclick:()=>S.canWrite?openAway(f):null,disabled:!S.canWrite||null},h("span",{class:"chip",style:"--cc:"+pVar(pi),text:f.hvem||"?"}),h("span",{class:"at",text:f.type||"Borte"}))}
+function tasksFor(day,stId){return S.oppg.filter(t=>t.dato===day&&t.stasjon===stId).sort((a,b)=>(a.rekke||0)-(b.rekke||0)||(a.opprettet||0)-(b.opprettet||0))}
+
+/* ---------- rader ---------- */
+function rowMode(){return S.rows==="stasjoner"||!staff().length?"stasjoner":"ansatte"}
+function sortT(a,b){return (a.rekke||0)-(b.rekke||0)||(a.opprettet||0)-(b.opprettet||0)}
+function rowDefs(days){
+  if(rowMode()==="stasjoner"){
+    return [{id:"_borte",label:"Borte",pi:-1,away:di=>awayOn(di),list:()=>[],borte:true}].concat(stations().map(s=>({id:s.id,label:s.navn,pi:-1,
+      list:di=>tasksFor(di,s.id),preset:di=>({dato:di,stasjon:s.id})})));
+  }
+  const st=staff();const rows=st.map(n=>({id:"p:"+n,label:n,pi:pIdx(n),person:n,
+    list:di=>S.oppg.filter(t=>t.dato===di&&names(t).includes(n)).sort(sortT),
+    away:di=>S.fravaer.filter(f=>f.hvem===n&&f.fra<=di&&(f.til||f.fra)>=di),
+    preset:di=>({dato:di,stasjon:(stations()[0]||{}).id,hvem:n})}));
+  const un=di=>S.oppg.filter(t=>t.dato===di&&!names(t).some(n=>st.includes(n))).sort(sortT);
+  if(S.canWrite||days.some(d=>un(iso(d)).length))rows.push({id:"_un",label:"Ikke fordelt",pi:-1,list:un,preset:di=>({dato:di,stasjon:(stations()[0]||{}).id})});
+  return rows;
+}
+/* ---------- ukevisning ---------- */
+function renderWeek(){
+  const days=weekDays(),sts=stations();
+  if(!S.st&&S.stLoaded===false){}
+  const rows=rowDefs(days),pm=rowMode()==="ansatte";
+  const thead=h("thead",null,h("tr",null,h("th",{class:"st",scope:"col",text:pm?"Ansatt":"Stasjon"}),
+    days.map(d=>h("th",{scope:"col",class:iso(d)===TODAY?"today":null},h("span",{class:"dn",text:DAYS[(d.getDay()+6)%7]}),h("span",{class:"dd",text:short(d)})))));
+  const tbody=h("tbody",null,rows.map(r=>h("tr",{class:r.borte?"awayrow":(r.person?"prow":null),style:r.pi>=0?"--pc:var(--p"+r.pi+")":null},
+    h("th",{class:"st",scope:"row"},r.pi>=0?h("span",{class:"pdot"}):null,r.label),
+    days.map(d=>{const di=iso(d);const aw=r.away?r.away(di):[];const ts=r.list(di);
+      return h("td",{class:(di===TODAY?"today":"")+(r.person&&aw.length?" isaway":"")},h("div",{class:"cell"+(r.borte?" aw":"")},
+        aw.map(awayChip),ts.map(t=>taskCard(t,{person:r.person})),
+        S.canWrite?(r.borte?h("button",{class:"add",type:"button","aria-label":"Legg inn fravær "+DAYS[(d.getDay()+6)%7],text:"+ Fravær",onclick:()=>openAway(null,di)}):
+          h("button",{class:"add",type:"button","aria-label":"Legg til for "+r.label+" "+DAYS[(d.getDay()+6)%7],text:"+",onclick:()=>openTask(null,r.preset(di))})):null))}))));
+  const board=h("div",{class:"board-scroll"},h("table",{class:"board"},thead,tbody));
+
+  const list=h("div",{class:"days"},days.map(d=>{
+    const di=iso(d);const groups=rows.map(r=>({r,aw:r.away?r.away(di):[],ts:r.list(di)})).filter(g=>g.ts.length||g.aw.length);
+    return h("section",{class:"day"+(di===TODAY?" today":"")},
+      h("h3",null,DAYS[(d.getDay()+6)%7],h("span",{text:short(d)})),
+      groups.length?groups.map(g=>h("div",{class:"grp"},h("h4",null,g.r.pi>=0?h("span",{class:"pdot",style:"--pc:var(--p"+g.r.pi+")"}):null,g.r.label),
+        g.aw.length?h("div",{class:"cell aw",style:"padding:0;min-height:0"},g.aw.map(awayChip)):null,g.ts.map(t=>taskCard(t,{person:g.r.person})))):h("div",{class:"empty",text:"Ingenting planlagt."}),
+      S.canWrite?h("div",{class:"foot",style:"display:flex;gap:6px"},h("button",{class:"add",type:"button",style:"flex:1",text:"+ Legg til jobb",onclick:()=>openTask(null,{dato:di,stasjon:(stations()[0]||{}).id})}),h("button",{class:"add",type:"button",text:"+ Fravær",onclick:()=>openAway(null,di)})):null);
+  }));
+
+  const nodes=[];
+  if(S.oLoaded&&S.tLoaded&&!S.ordre.length&&S.canWrite){
+    nodes.push(h("div",{class:"empty-state"},h("h3",{text:"Start med ordrene"}),
+      h("p",{text:"Trykk + i ruta for ansatt og dag. Velg en ordre, lag en ny med ordrenummer der og da, eller skriv en vanlig arbeidsoppgave uten ordre."}),
+      h("button",{class:"btn primary",type:"button",text:"Legg til første ordre",onclick:()=>openOrder(null)})));
+  }
+  nodes.push(board,list);
+  return nodes;
+}
+
+/* ---------- ordrevisning ---------- */
+function hoursOf(oid){return S.timer.filter(x=>x.ordreId===oid)}
+function fmtH(n){return (Math.round(n*100)/100).toString().replace(".",",")+" t"}
+function sumH(list){return list.reduce((a,x)=>a+(Number(x.timer)||0),0)}
+function firstTitle(lines){for(const l of lines||[]){const t=((l.b||"").split("\n").find(x=>x.trim())||l.p||"").trim();if(t)return t.length>70?t.slice(0,68)+"…":t}return ""}
+function linesBlock(o){
+  if(!o.linjer||!o.linjer.length)return null;
+  return h("details",{class:"olines",open:true},h("summary",{text:"Ordrelinjer fra Tripletex ("+o.linjer.length+")"}),
+    h("div",{class:"ol"},o.linjer.map(l=>h("div",{class:"oli"},h("span",{class:"q",text:(l.a||l.a===0)?String(l.a).replace(".",",")+" ×":""}),h("div",null,l.p?h("b",{text:l.p}):null,l.b?h("div",{class:"lb2",text:l.b}):null)))));
+}
+function hoursBlock(o){
+  const hs=hoursOf(o.id);if(!hs.length)return h("p",{class:"hint",style:"margin:0",text:"Ingen timer ført på denne ordren ennå."});
+  const per={};hs.forEach(x=>{per[x.hvem||"?"]=(per[x.hvem||"?"]||0)+(Number(x.timer)||0)});
+  const rows=hs.slice().sort((a,b)=>(b.dato||"").localeCompare(a.dato||""));
+  return h("div",{class:"hblock"},h("div",{class:"hsum"},h("b",{text:"Timer totalt: "+fmtH(sumH(hs))}),
+      h("div",{class:"hper"},Object.keys(per).sort((a,b)=>per[b]-per[a]).map(n=>h("span",{class:"chip",style:"--cc:"+pVar(pIdx(n)),text:n+" "+fmtH(per[n])})))),
+    h("details",null,h("summary",{text:"Alle registreringer ("+hs.length+")"}),h("div",{class:"hlist"},rows.map(x=>h("div",{class:"hrow"},
+      h("span",{text:short(parse(x.dato))}),h("span",{text:x.hvem||""}),h("b",{text:fmtH(Number(x.timer)||0)}),h("span",{class:"hk",text:x.kommentar||""}),
+      S.canWrite?h("button",{class:"icon-btn",type:"button","aria-label":"Slett registrering",text:"✕",onclick:async()=>{try{await S.db.doc("timer/"+x.id).delete();toast("Registrering slettet")}catch(e){toast(writeErr(e))}}}):null)))));
+}
+async function importTx(c){
+  const lev=c.lev&&c.odato&&c.lev>c.odato?c.lev:"";
+  try{
+    await S.db.doc("ordre/tx"+c.tid).set({nr:c.nr,navn:c.kunde||c.nr,hva:c.ref||firstTitle(c.var),levering:lev,notat:"",status:"aktiv",linjer:c.var||[],tripletexId:c.tid,farge:nextColor(),opprettet:Date.now()});
+    await S.db.doc("tripletex/"+c.id).update({importert:true});toast("Ordre "+c.nr+" er tatt inn");
+  }catch(e){toast(writeErr(e))}
+}
+function renderTx(){
+  if(!S.tripletex.length||!S.canWrite)return null;
+  const imp=new Set(S.ordre.map(o=>o.tripletexId).filter(Boolean));
+  const left=S.tripletex.filter(c=>!c.importert&&!imp.has(c.tid));
+  const vis=left.filter(c=>S.visSkjulte||!c.skjult).sort((a,b)=>String(b.nr).localeCompare(String(a.nr),"nb",{numeric:true}));
+  const hidden=left.filter(c=>c.skjult).length;
+  return h("div",{style:"display:flex;flex-direction:column;gap:10px;margin-top:14px"},
+    h("div",{class:"sec-h"},h("h2",{text:"Fra Tripletex"}),h("span",{text:vis.length+" åpne ordre ikke tatt inn"})),
+    h("p",{class:"hint",style:"margin:0",text:"Ta inn ordrene som skal i produksjon. Da kan du sette dem på de ansatte, og de kan lese ordrelinjene og føre timer på dem. Prisene tas ikke med."}),
+    vis.length?h("div",{class:"list"},vis.map(c=>h("div",{class:"txrow"},
+      h("div",{class:"mid"},h("b",null,h("span",{class:"nr",text:c.nr+" "}),c.kunde||""),h("span",{text:[c.ref,firstTitle(c.var)].filter(Boolean).join(" · ")||" "})),
+      h("div",{class:"txa"},h("button",{class:"btn primary",type:"button",text:"Ta inn",onclick:()=>importTx(c)}),
+        h("button",{class:"btn ghost",type:"button",text:c.skjult?"Vis":"Skjul",onclick:async()=>{try{await S.db.doc("tripletex/"+c.id).update({skjult:!c.skjult})}catch(e){toast(writeErr(e))}}}))))):h("p",{class:"hint",style:"margin:0",text:"Alle åpne Tripletex-ordre er tatt inn eller skjult."}),
+    hidden?h("button",{class:"btn ghost",type:"button",style:"align-self:flex-start",text:S.visSkjulte?"Skjul de skjulte":"Vis skjulte ("+hidden+")",onclick:()=>{S.visSkjulte=!S.visSkjulte;render()}}):null);
+}
+function renderOrders(){
+  const act=S.ordre.filter(o=>o.status!=="levert").sort((a,b)=>(a.levering||"9").localeCompare(b.levering||"9"));
+  const done=S.ordre.filter(o=>o.status==="levert").sort((a,b)=>(b.levering||"").localeCompare(a.levering||""));
+  const row=o=>{
+    const cnt=S.oppg.filter(t=>t.ordreId===o.id);const fe=cnt.filter(t=>t.ferdig).length;
+    const n=o.levering?daysBetween(new Date(),parse(o.levering)):null;
+    return h("button",{class:"orow"+(o.status==="levert"?" levert":""),type:"button",style:"--oc:"+oc(o),onclick:()=>S.canWrite?openOrder(o):viewOrder(o)},
+      h("span",{class:"sw"}),
+      h("span",{class:"mid"},h("b",null,o.nr?h("span",{class:"nr",text:o.nr+" "}):null,o.navn||"Uten navn"),h("span",{text:[o.hva,o.notat].filter(Boolean).join(" · ")||" "})),
+      h("span",{class:"rt"},o.levering?h("span",{text:"Lev. "+short(parse(o.levering))}):h("span",{text:"Ingen dato"}),
+        o.status==="levert"?h("span",{class:"pill",text:"levert"}):(n!=null?dueTag(n):null),
+        cnt.length?h("span",{text:fe+"/"+cnt.length+" jobber ferdig"}):null,
+        hoursOf(o.id).length?h("span",{text:fmtH(sumH(hoursOf(o.id)))+" ført"}):null));
+  };
+  const out=[h("div",{class:"sec-h"},h("h2",{text:"Aktive ordre"}),S.canWrite?h("button",{class:"btn primary",type:"button",text:"+ Ny ordre",onclick:()=>openOrder(null)}):h("span"))];
+  out.push(act.length?h("div",{class:"list"},act.map(row)):h("div",{class:"empty-state"},h("h3",{text:"Ingen aktive ordre"}),h("p",{text:S.canWrite?"Legg til ordre med kunde, hva som skal lages og leveringsdato.":"Det er ingen ordre lagt inn ennå."})));
+  const tx=renderTx();if(tx)out.push(tx);
+  if(done.length){out.push(h("div",{class:"sec-h",style:"margin-top:10px"},h("h2",{text:"Levert"}),h("span",{text:done.length+" stk"})),h("div",{class:"list"},done.slice(0,30).map(row)))}
+  return [h("div",{style:"display:flex;flex-direction:column;gap:10px"},out)];
+}
+
+/* ---------- stasjoner ---------- */
+function renderStations(){
+  let draft=stations().map(s=>({...s}));
+  const box=h("div",{style:"display:flex;flex-direction:column;gap:10px"});
+  const draw=()=>{
+    const list=h("div",{class:"list"},draft.map((s,i)=>h("div",{class:"strow"},
+      h("input",{id:"st-"+s.id,value:s.navn,"aria-label":"Navn på stasjon",oninput:e=>{s.navn=e.target.value},style:"border:1px solid var(--line);border-radius:6px;padding:8px 10px;background:var(--bg);min-height:38px"}),
+      h("button",{class:"icon-btn",type:"button","aria-label":"Flytt opp",disabled:i===0||null,text:"↑",onclick:()=>{[draft[i-1],draft[i]]=[draft[i],draft[i-1]];draw()}}),
+      h("button",{class:"icon-btn",type:"button","aria-label":"Flytt ned",disabled:i===draft.length-1||null,text:"↓",onclick:()=>{[draft[i+1],draft[i]]=[draft[i],draft[i+1]];draw()}}),
+      h("button",{class:"icon-btn",type:"button","aria-label":"Fjern",text:"✕",onclick:()=>{draft.splice(i,1);draw()}}))));
+    box.replaceChildren(
+      h("div",{class:"sec-h"},h("h2",{text:"Stasjoner"}),h("span",{text:"Radene i ukeplanen"})),
+      h("p",{class:"hint",style:"margin:0",text:"Gi stasjonene navn slik dere bruker dem i verkstedet. Jobber på en stasjon du fjerner blir liggende, men vises ikke i planen."}),
+      list,
+      h("div",{class:"acts"},h("button",{class:"btn",type:"button",text:"+ Ny stasjon",onclick:()=>{draft.push({id:"s"+Date.now().toString(36),navn:"Ny stasjon"});draw()}}),
+        h("div",{class:"r"},h("button",{class:"btn primary",type:"button",text:"Lagre stasjoner",onclick:async()=>{
+          const clean=draft.map(s=>({id:s.id,navn:(s.navn||"").trim()||"Uten navn"}));
+          try{await S.db.doc("oppsett/stasjoner").set({liste:clean});toast("Stasjoner lagret")}catch(e){toast(writeErr(e))}}}))));
+  };
+  draw();return [box,renderStaff(),renderExcelPanel()];
+}
+
+/* ---------- ansatte ---------- */
+function staff(){return Array.isArray(S.ansatte)?S.ansatte:[]}
+const PCOL=["Blå","Oransje","Grønn","Lilla","Gul","Rosa","Turkis","Brun","Rød","Grå","Oliven","Marine"];
+const PHEX=["2F6FB3","D0661F","2E8A57","8A3FA8","9A7A00","C23B6B","2A8F9C","8A5A3A","C0392B","66707A","6B7A1F","2C3E8F"];
+const PTINT=["DBE8F6","FBE3D2","D9EFE2","ECDCF3","F6EBC0","F7D9E4","D4EEF1","ECDFD5","F6D8D4","E3E6E9","E7ECD0","D9DCF0"];
+function pIdx(name){const n=(name||"").trim();if(!n)return -1;const f=S.farger||{};if(f[n]!=null)return f[n]%12;const i=staff().indexOf(n);return i>=0?i%12:-1}
+function names(t){return (t.hvem||"").split(",").map(x=>x.trim()).filter(Boolean)}
+function pVar(i){return i<0?"var(--muted)":"var(--p"+i+")"}
+function renderStaff(){
+  let draft=staff().map(n=>({n,c:pIdx(n)}));
+  const box=h("div",{style:"display:flex;flex-direction:column;gap:10px;margin-top:18px"});
+  const freeColor=()=>{const used=new Set(draft.map(d=>d.c));for(let i=0;i<12;i++)if(!used.has(i))return i;return draft.length%12};
+  const draw=()=>{
+    const inNew=h("input",{id:"ans-ny",placeholder:"Navn på ansatt",autocomplete:"off",style:"flex:1;min-width:0;border:1px solid var(--line);border-radius:6px;padding:8px 10px;background:var(--bg);min-height:38px"});
+    const add=()=>{const v=inNew.value.trim();if(v&&!draft.some(d=>d.n===v)){draft.push({n:v,c:freeColor()});draw();setTimeout(()=>$("ans-ny").focus(),10)}};
+    inNew.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();add()}});
+    box.replaceChildren(
+      h("div",{class:"sec-h"},h("h2",{text:"Ansatte"}),h("span",{text:"Hver ansatt har sin farge i planen"})),
+      draft.length?h("div",{class:"list"},draft.map((d,i)=>{const sw=h("span",{class:"cs",style:"--cc:var(--p"+d.c+")"});
+        return h("div",{class:"strow"},sw,
+        h("input",{id:"ans-"+i,value:d.n,"aria-label":"Navn",oninput:e=>{d.n=e.target.value},style:"border:1px solid var(--line);border-radius:6px;padding:8px 10px;background:var(--bg);min-height:38px"}),
+        h("select",{id:"ansf-"+i,"aria-label":"Farge for "+d.n,onchange:e=>{d.c=+e.target.value;sw.style.setProperty("--cc","var(--p"+d.c+")")}},PCOL.map((c,ci)=>h("option",{value:ci,text:c,selected:ci===d.c||null}))),
+        h("button",{class:"icon-btn",type:"button","aria-label":"Fjern "+d.n,text:"✕",onclick:()=>{draft.splice(i,1);draw()}}))})):h("p",{class:"hint",style:"margin:0",text:"Ingen ansatte lagt inn ennå."}),
+      h("div",{style:"display:flex;gap:8px"},inNew,h("button",{class:"btn",type:"button",text:"Legg til",onclick:add})),
+      h("div",{class:"acts"},h("div",{class:"r"},h("button",{class:"btn primary",type:"button",text:"Lagre ansatte",onclick:async()=>{
+        const pending=inNew.value.trim();if(pending&&!draft.some(d=>d.n===pending))draft.push({n:pending,c:freeColor()});
+        const seen=new Set();const clean=[];const farger={};
+        draft.forEach(d=>{const n=(d.n||"").trim();if(n&&!seen.has(n)){seen.add(n);clean.push(n);farger[n]=d.c}});
+        try{await S.db.doc("oppsett/ansatte").set({liste:clean,farger});toast("Ansatte lagret")}catch(e){toast(writeErr(e))}}}))));
+  };
+  draw();return box;
+}
+
+function render(){
+  renderHead();if(!S.noteEdit||S.noteKey!==weekKey(S.week)){S.noteEdit=false;renderNote()}renderDeliveries();
+  const m=$("main");
+  m.replaceChildren(...(S.view==="ordre"?renderOrders():S.view==="st"&&S.canWrite?renderStations():renderWeek()));
+}
+
+/* ---------- skjema: jobb ---------- */
+function closeOv(){$("ovRoot").replaceChildren()}
+function sheet(title,content){
+  const ov=h("div",{class:"ov",onclick:e=>{if(e.target===ov)closeOv()}},h("div",{class:"sheet",role:"dialog","aria-modal":"true","aria-label":title},h("h2",{text:title}),content));
+  $("ovRoot").replaceChildren(ov);
+  const f=ov.querySelector("input,select,textarea");if(f)setTimeout(()=>f.focus(),30);
+  ov.addEventListener("keydown",e=>{if(e.key==="Escape")closeOv()});
+}
+function people(){return [...new Set(S.oppg.map(t=>(t.hvem||"").trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b,"nb"))}
+
+function openTask(t,preset){
+  const isNew=!t;const v=t?{...t}:{dato:preset.dato,stasjon:preset.stasjon,ordreId:"",hvem:preset.hvem||"",tekst:"",ferdig:false};
+  const actO=S.ordre.filter(o=>o.status!=="levert"||o.id===v.ordreId).sort((a,b)=>(a.levering||"9").localeCompare(b.levering||"9"));
+  const days=weekDays();
+  const form=h("form",{style:"display:flex;flex-direction:column;gap:12px"});
+  const selO=h("select",{id:"f-ordre"},
+    h("option",{value:"",text:"Ingen ordre – annen arbeidsoppgave",selected:!v.ordreId||null}),
+    actO.length?h("optgroup",{label:"Ordre"},actO.map(o=>h("option",{value:o.id,text:oLabel(o)+(o.levering?"  ·  lev. "+short(parse(o.levering)):""),selected:o.id===v.ordreId||null}))):null,
+    h("option",{value:"__ny",text:"+ Ny ordre …"}));
+  const nNr=h("input",{id:"n-nr",placeholder:"F.eks. 2026-114",autocomplete:"off"});
+  const nNavn=h("input",{id:"n-navn",placeholder:"Kunde eller prosjekt",autocomplete:"off"});
+  const nHva=h("input",{id:"n-hva",placeholder:"F.eks. kjøkken, garderobe"});
+  const nLev=h("input",{id:"n-lev",type:"date"});
+  const newBox=h("div",{class:"newo",hidden:true},
+    h("div",{class:"row2"},h("div",{class:"f"},h("label",{for:"n-nr",text:"Ordrenr."}),nNr),h("div",{class:"f"},h("label",{for:"n-navn",text:"Kunde / prosjekt"}),nNavn)),
+    h("div",{class:"row2"},h("div",{class:"f"},h("label",{for:"n-hva",text:"Hva skal lages"}),nHva),h("div",{class:"f"},h("label",{for:"n-lev",text:"Leveringsdato"}),nLev)),
+    h("span",{class:"hint",text:"Ordren legges også i ordrelista."}));
+  const txLabel=h("label",{for:"f-tekst"});
+  const syncO=()=>{newBox.hidden=selO.value!=="__ny";txLabel.textContent=selO.value===""?"Arbeidsoppgave":"Hva skal gjøres";inTx.placeholder=selO.value===""?"F.eks. vedlikehold av CNC, rydde lager, ta imot plater":"F.eks. skrog og fronter, 14 stk";if(selO.value==="__ny")setTimeout(()=>nNr.focus(),20)};
+  selO.addEventListener("change",syncO);
+  const selS=h("select",{id:"f-stasjon"},stations().map(s=>h("option",{value:s.id,text:s.navn,selected:s.id===v.stasjon||null})));
+  const cur=(v.hvem||"").split(",").map(x=>x.trim()).filter(Boolean);
+  const st=staff();const extra=cur.filter(n=>!st.includes(n));
+  const whoPick=st.length?h("div",{class:"daypick"},st.map((n,i)=>h("label",null,h("input",{type:"checkbox",name:"hvem",value:n,checked:cur.includes(n)||null,id:"hv-"+i}),h("span",{class:"chipdot",style:"--cc:"+pVar(pIdx(n))}),n))):null;
+  const inWho=h("input",{id:"f-hvem",list:"dl-folk",value:extra.join(", "),placeholder:st.length?"Andre (valgfritt)":"Navn eller initialer",autocomplete:"off"});
+  const dlist=h("datalist",{id:"dl-folk"},people().filter(p=>!st.includes(p)).map(p=>h("option",{value:p})));
+  const whoVal=()=>{const picked=[...form.querySelectorAll('input[name="hvem"]:checked')].map(x=>x.value);const ex=inWho.value.split(",").map(x=>x.trim()).filter(Boolean);return [...new Set([...picked,...ex])].join(", ")};
+  const inTx=h("textarea",{id:"f-tekst",placeholder:"F.eks. skrog og fronter, 14 stk"});inTx.value=v.tekst||"";
+  let dayField;
+  if(isNew){
+    dayField=h("div",{class:"f"},h("span",{class:"lb",text:"Dager"}),h("div",{class:"daypick"},days.map(d=>{const di=iso(d);return h("label",null,h("input",{type:"checkbox",name:"dager",value:di,checked:di===v.dato||null}),DAYS[(d.getDay()+6)%7].slice(0,3)+" "+d.getDate()+".")})),h("span",{class:"hint",text:"Velg flere dager hvis jobben går over flere dager."}));
+  }else{
+    dayField=h("div",{class:"f"},h("label",{for:"f-dato",text:"Dag"}),h("input",{id:"f-dato",type:"date",value:v.dato}));
+  }
+  const conf=h("div");
+  const acts=h("div",{class:"acts"},
+    !isNew?h("button",{class:"btn danger ghost",type:"button",text:"Slett",onclick:()=>{conf.replaceChildren(h("div",{class:"confirm"},"Slette denne jobben?",h("button",{class:"btn danger",type:"button",text:"Ja, slett",onclick:async()=>{try{await S.db.doc("oppgaver/"+t.id).delete();closeOv();toast("Jobb slettet")}catch(e){toast(writeErr(e))}}}),h("button",{class:"btn",type:"button",text:"Avbryt",onclick:()=>conf.replaceChildren()})))}}):h("span"),
+    h("div",{class:"r"},h("button",{class:"btn",type:"button",text:"Avbryt",onclick:closeOv}),h("button",{class:"btn primary",type:"submit",text:isNew?"Legg til":"Lagre"})));
+  form.append(
+    h("div",{class:"f"},h("label",{for:"f-ordre",text:"Ordre"}),selO),
+    newBox,
+    h("div",{class:"f"},txLabel,inTx),
+    h("div",{class:"f"},h("label",{for:"f-stasjon",text:"Stasjon"}),selS),
+    h("div",{class:"f"},h(st.length?"span":"label",st.length?{class:"lb",text:"Hvem"}:{for:"f-hvem",text:"Hvem"}),whoPick,inWho,dlist,
+      !st.length&&S.canWrite?h("span",{class:"hint",text:"Tips: legg inn de ansatte under Oppsett, så kan du krysse av i stedet for å skrive."}):null),
+    dayField,
+    conf,acts);
+  syncO();
+  form.addEventListener("submit",async e=>{
+    e.preventDefault();
+    let ordreId=selO.value;
+    if(ordreId===""&&!inTx.value.trim()){toast("Skriv hva som skal gjøres");inTx.focus();return}
+    try{
+      if(ordreId==="__ny"){
+        const navn=nNavn.value.trim(),nr=nNr.value.trim();
+        if(!navn&&!nr){toast("Skriv ordrenummer eller kunde");nNr.focus();return}
+        const ref=await S.db.collection("ordre").add({nr,navn:navn||nr,hva:nHva.value.trim(),levering:nLev.value||"",notat:"",status:"aktiv",farge:nextColor(),opprettet:Date.now()});
+        ordreId=ref.id;
+      }
+    }catch(err){toast(writeErr(err));return}
+    const base={ordreId:ordreId||"",stasjon:selS.value,hvem:whoVal(),tekst:inTx.value.trim()};
+    try{
+      if(isNew){
+        const ds=[...form.querySelectorAll('input[name="dager"]:checked')].map(x=>x.value);
+        if(!ds.length){toast("Velg minst én dag");return}
+        for(const d of ds){await S.db.collection("oppgaver").add({...base,dato:d,ferdig:false,opprettet:Date.now()})}
+        toast(ds.length>1?ds.length+" jobber lagt til":"Jobb lagt til");
+      }else{
+        const d=form.querySelector("#f-dato").value||v.dato;
+        await S.db.doc("oppgaver/"+t.id).set({...base,dato:d,ferdig:!!t.ferdig,opprettet:t.opprettet||Date.now()});
+        toast("Lagret");
+      }
+      closeOv();
+    }catch(err){toast(writeErr(err))}
+  });
+  sheet(isNew?"Ny jobb":"Endre jobb",form);
+}
+
+function openAway(f,day){
+  const isNew=!f;const v=f?{...f}:{hvem:"",fra:day,til:day,type:"Syk",notat:""};
+  const form=h("form",{style:"display:flex;flex-direction:column;gap:12px"});
+  const st=staff();
+  const selW=st.length?h("select",{id:"fr-hvem"},h("option",{value:"",text:"Velg ansatt"}),st.map(n=>h("option",{value:n,text:n,selected:n===v.hvem||null}))):h("input",{id:"fr-hvem",value:v.hvem||"",placeholder:"Navn"});
+  const inF=h("input",{id:"fr-fra",type:"date",value:v.fra||""});const inT=h("input",{id:"fr-til",type:"date",value:v.til||v.fra||""});
+  inF.addEventListener("change",()=>{if(!inT.value||inT.value<inF.value)inT.value=inF.value});
+  const selT=h("select",{id:"fr-type"},FTYPER.map(t=>h("option",{value:t,text:t,selected:t===v.type||null})));
+  const inN=h("input",{id:"fr-notat",value:v.notat||"",placeholder:"Valgfritt, f.eks. «tilbake etter lunsj»"});
+  const conf=h("div");
+  form.append(
+    h("div",{class:"f"},h("label",{for:"fr-hvem",text:"Hvem"}),selW),
+    h("div",{class:"row2"},h("div",{class:"f"},h("label",{for:"fr-fra",text:"Fra"}),inF),h("div",{class:"f"},h("label",{for:"fr-til",text:"Til og med"}),inT)),
+    h("div",{class:"f"},h("label",{for:"fr-type",text:"Årsak"}),selT),
+    h("div",{class:"f"},h("label",{for:"fr-notat",text:"Merknad"}),inN),
+    conf,
+    h("div",{class:"acts"},
+      !isNew?h("button",{class:"btn danger ghost",type:"button",text:"Slett",onclick:()=>{conf.replaceChildren(h("div",{class:"confirm"},"Slette fraværet?",h("button",{class:"btn danger",type:"button",text:"Ja, slett",onclick:async()=>{try{await S.db.doc("fravaer/"+f.id).delete();closeOv();toast("Fravær slettet")}catch(e){toast(writeErr(e))}}}),h("button",{class:"btn",type:"button",text:"Avbryt",onclick:()=>conf.replaceChildren()})))}}):h("span"),
+      h("div",{class:"r"},h("button",{class:"btn",type:"button",text:"Avbryt",onclick:closeOv}),h("button",{class:"btn primary",type:"submit",text:isNew?"Legg inn":"Lagre"}))));
+  form.addEventListener("submit",async e=>{e.preventDefault();
+    const hvem=(selW.value||"").trim();if(!hvem){toast("Velg hvem som er borte");return}
+    if(!inF.value){toast("Velg fra-dato");return}
+    const body={hvem,fra:inF.value,til:inT.value&&inT.value>=inF.value?inT.value:inF.value,type:selT.value,notat:inN.value.trim()};
+    try{if(isNew)await S.db.collection("fravaer").add({...body,opprettet:Date.now()});else await S.db.doc("fravaer/"+f.id).set({...body,opprettet:f.opprettet||Date.now()});closeOv();toast(isNew?"Fravær lagt inn":"Lagret")}catch(err){toast(writeErr(err))}});
+  sheet(isNew?"Fravær":"Endre fravær",form);
+}
+
+async function toggleDone(t){
+  if(!S.canWrite)return;
+  try{await S.db.doc("oppgaver/"+t.id).update({ferdig:!t.ferdig})}catch(e){toast(writeErr(e))}
+}
+
+/* ---------- skjema: ordre ---------- */
+function openOrder(o){
+  const isNew=!o;const v=o?{...o}:{navn:"",hva:"",levering:"",notat:"",status:"aktiv"};
+  const form=h("form",{style:"display:flex;flex-direction:column;gap:12px"});
+  const inNr=h("input",{id:"o-nr",value:v.nr||"",placeholder:"F.eks. 2026-114",autocomplete:"off"});
+  const inN=h("input",{id:"o-navn",value:v.navn||"",placeholder:"Kunde eller prosjekt"});
+  const inH=h("input",{id:"o-hva",value:v.hva||"",placeholder:"F.eks. kjøkken, garderobe, 12 stoler"});
+  const inL=h("input",{id:"o-lev",type:"date",value:v.levering||""});
+  const selSt=h("select",{id:"o-status"},h("option",{value:"aktiv",text:"Aktiv",selected:v.status!=="levert"||null}),h("option",{value:"levert",text:"Levert",selected:v.status==="levert"||null}));
+  const inNo=h("textarea",{id:"o-notat",placeholder:"Farge, materiale, spesielle hensyn …"});inNo.value=v.notat||"";
+  const conf=h("div");
+  const linked=o?S.oppg.filter(t=>t.ordreId===o.id).length:0;
+  form.append(
+    h("div",{class:"row2"},h("div",{class:"f"},h("label",{for:"o-nr",text:"Ordrenr."}),inNr),h("div",{class:"f"},h("label",{for:"o-navn",text:"Kunde / prosjekt"}),inN)),
+    h("div",{class:"f"},h("label",{for:"o-hva",text:"Hva skal lages"}),inH),
+    h("div",{class:"row2"},h("div",{class:"f"},h("label",{for:"o-lev",text:"Leveringsdato"}),inL),h("div",{class:"f"},h("label",{for:"o-status",text:"Status"}),selSt)),
+    h("div",{class:"f"},h("label",{for:"o-notat",text:"Notat"}),inNo),
+    o?linesBlock(o):null,
+    o?h("div",{class:"f"},h("span",{class:"lb",text:"Timer"}),hoursBlock(o)):null,
+    conf,
+    h("div",{class:"acts"},
+      !isNew?h("button",{class:"btn danger ghost",type:"button",text:"Slett",onclick:()=>{conf.replaceChildren(h("div",{class:"confirm"},linked?"Slette ordren? "+linked+" jobber blir liggende uten ordre.":"Slette ordren?",h("button",{class:"btn danger",type:"button",text:"Ja, slett",onclick:async()=>{try{await S.db.doc("ordre/"+o.id).delete();closeOv();toast("Ordre slettet")}catch(e){toast(writeErr(e))}}}),h("button",{class:"btn",type:"button",text:"Avbryt",onclick:()=>conf.replaceChildren()})))}}):h("span"),
+      h("div",{class:"r"},h("button",{class:"btn",type:"button",text:"Avbryt",onclick:closeOv}),h("button",{class:"btn primary",type:"submit",text:isNew?"Legg til ordre":"Lagre"}))));
+  form.addEventListener("submit",async e=>{
+    e.preventDefault();
+    const nr=inNr.value.trim();const navn=inN.value.trim()||nr;if(!navn){toast("Skriv ordrenummer eller kunde");return}
+    const body={nr,navn,hva:inH.value.trim(),levering:inL.value||"",notat:inNo.value.trim(),status:selSt.value};
+    try{
+      if(isNew){await S.db.collection("ordre").add({...body,farge:nextColor(),opprettet:Date.now()});toast("Ordre lagt til")}
+      else{const keep={...o};delete keep.id;await S.db.doc("ordre/"+o.id).set({...keep,...body,farge:o.farge??0,opprettet:o.opprettet||Date.now()});toast("Lagret")}
+      closeOv();
+    }catch(err){toast(writeErr(err))}
+  });
+  sheet(isNew?"Ny ordre":"Endre ordre",form);
+}
+
+function nextColor(){const used=new Set(S.ordre.filter(x=>x.status!=="levert").map(x=>x.farge));let f=0;while(used.has(f)&&f<8)f++;return f>=8?S.ordre.length%8:f}
+
+/* ---------- lesevisning for ansatte ---------- */
+function stName(id){const s=stations().find(x=>x.id===id);return s?s.navn:""}
+function viewTask(t){
+  const o=orderById(t.ordreId);const d=parse(t.dato);
+  const dl=h("dl",{class:"dlist"},
+    o?[h("dt",{text:"Ordre"}),h("dd",{text:oLabel(o)})]:null,
+    o&&o.hva?[h("dt",{text:"Lages"}),h("dd",{text:o.hva})]:null,
+    t.tekst?[h("dt",{text:o?"Oppgave":"Arbeidsoppgave"}),h("dd",{text:t.tekst})]:null,
+    [h("dt",{text:"Når"}),h("dd",{text:DAYS[(d.getDay()+6)%7]+" "+short(d)+(stName(t.stasjon)?" · "+stName(t.stasjon):"")})],
+    t.hvem?[h("dt",{text:"Hvem"}),h("dd",{text:t.hvem})]:null,
+    o&&o.levering?[h("dt",{text:"Levering"}),h("dd",{text:short(parse(o.levering))+" "+parse(o.levering).getFullYear()})]:null,
+    o&&o.notat?[h("dt",{text:"Notat"}),h("dd",{text:o.notat})]:null,
+    [h("dt",{text:"Status"}),h("dd",{text:t.ferdig?"Ferdig":"Ikke ferdig"})]);
+  sheet(o?oLabel(o):"Arbeidsoppgave",h("div",{style:"display:flex;flex-direction:column;gap:14px"},dl,h("div",{class:"acts"},h("div",{class:"r"},h("button",{class:"btn primary",type:"button",text:"Lukk",onclick:closeOv})))));
+}
+function viewOrder(o){
+  const ts=S.oppg.filter(t=>t.ordreId===o.id).sort((a,b)=>a.dato.localeCompare(b.dato));
+  const dl=h("dl",{class:"dlist"},
+    o.nr?[h("dt",{text:"Ordrenr."}),h("dd",{text:o.nr})]:null,
+    [h("dt",{text:"Kunde"}),h("dd",{text:o.navn||""})],
+    o.hva?[h("dt",{text:"Lages"}),h("dd",{text:o.hva})]:null,
+    o.levering?[h("dt",{text:"Levering"}),h("dd",{text:short(parse(o.levering))+" "+parse(o.levering).getFullYear()})]:null,
+    o.notat?[h("dt",{text:"Notat"}),h("dd",{text:o.notat})]:null);
+  const list=ts.length?h("div",{style:"display:flex;flex-direction:column;gap:6px"},h("span",{class:"hint",text:"Planlagte jobber"}),ts.map(t=>{const d=parse(t.dato);return h("div",{class:"task"+(t.ferdig?" done":""),style:"--oc:"+oc(o)},h("div",{class:"tx"},h("span",{class:"on",text:DAYS[(d.getDay()+6)%7].slice(0,3)+" "+short(d)+" · "+stName(t.stasjon)}),t.tekst?h("span",{class:"de",text:t.tekst}):null,t.hvem?h("span",{class:"who",text:t.hvem}):null))})):null;
+  sheet(oLabel(o),h("div",{style:"display:flex;flex-direction:column;gap:14px"},dl,linesBlock(o),hoursBlock(o),list,h("div",{class:"acts"},h("div",{class:"r"},h("button",{class:"btn primary",type:"button",text:"Lukk",onclick:closeOv})))));
+}
+
+function writeErr(e){
+  if(e&&e.code==="invalid_argument"){S.canWrite=false;render();return "Du har bare lesetilgang til planen."}
+  if(e&&e.code==="quota_exceeded")return "Planen er full. Slett gamle jobber og prøv igjen.";
+  return "Fikk ikke lagret. Prøv igjen om litt.";
+}
+
+/* ---------- utskrift ---------- */
+function esc(s){return String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
+function printHtml(){
+  const days=weekDays(),sts=stations();
+  const pal=["#2f6fb3","#c2571a","#2e8a57","#8a3fa8","#b8872a","#c23b6b","#3a8f9a","#6b6f2a"];
+  const col=o=>o?pal[((o.farge!=null?o.farge:7))%8]:"#999";
+  const note=((S.uker[weekKey(S.week)]||{}).tekst)||"";
+  const rows=rowDefs(days),pm=rowMode()==="ansatte";
+  const card=(t,person)=>{const o=orderById(t.ordreId);const ns=names(t);const pi=person?pIdx(person):pIdx(ns[0]);const sty=pi>=0?`border-left-color:#${PHEX[pi]};background:#${PTINT[pi]}`:"";
+    const others=person?ns.filter(n=>n!==person):ns;const sn=person?stName2(t.stasjon):"";
+    return `<div class="t${t.ferdig?" d":""}" style="${sty}">${o?`<b><span class="sq" style="background:${col(o)}"></span>${esc(oLabel(o))}</b>`:""}${t.tekst?(o?`<span>${esc(t.tekst)}</span>`:`<b>${esc(t.tekst)}</b>`):""}${(sn||others.length)?`<i>${sn?`<span class="sl">${esc(sn)}</span> `:""}${others.map(n=>{const k=pIdx(n);return `<span class="ch" style="background:#${k>=0?PHEX[k]:"666"}">${esc(n)}</span>`}).join(" ")}</i>`:""}</div>`};
+  const awayHtml=fs=>fs.map(f=>{const k=pIdx(f.hvem);return `<div class="aw"><span class="ch" style="background:#${k>=0?PHEX[k]:"666"}">${esc(f.hvem)}</span> ${esc(f.type||"Borte")}</div>`}).join("");
+  const bodyRows=rows.map(r=>`<tr><th class="st"${r.pi>=0?` style="border-left:5pt solid #${PHEX[r.pi]}"`:""}>${esc(r.label)}</th>${days.map(d=>{const di=iso(d);return `<td${r.borte?' style="height:auto"':""}>${awayHtml(r.away?r.away(di):[])}${r.list(di).map(t=>card(t,r.person)).join("")}</td>`}).join("")}</tr>`).join("");
+  const act=S.ordre.filter(o=>o.status!=="levert").sort((a,b)=>(a.levering||"9").localeCompare(b.levering||"9"));
+  const now=new Date();
+  return `<!doctype html><html lang="no"><head><meta charset="utf-8"><title>Produksjonsplan uke ${isoWeek(S.week)}</title><style>
+@page{size:A4 landscape;margin:10mm}
+*{box-sizing:border-box}body{font-family:"Segoe UI",Arial,sans-serif;color:#111;margin:0;font-size:10.5pt}
+.hd{display:flex;justify-content:space-between;align-items:flex-end;border-bottom:2.5pt solid #111;padding-bottom:4pt;margin-bottom:6pt}
+h1{font-family:"Arial Narrow",Arial,sans-serif;font-size:22pt;margin:0;font-stretch:condensed}
+.sub{font-size:9pt;color:#444}
+table{width:100%;border-collapse:collapse;table-layout:fixed}
+th,td{border:0.75pt solid #777;vertical-align:top;padding:3pt}
+thead th{background:#e6e6e6;text-align:left;font-size:10pt}
+th.st{width:24mm;background:#e6e6e6;text-align:left;font-size:10pt}
+td{height:24mm}
+.t{border:0.5pt solid #bbb;border-left:4pt solid #888;padding:2pt 3pt;margin-bottom:2pt;display:flex;flex-direction:column;font-size:9pt;line-height:1.2;break-inside:avoid}
+.t b{font-size:9pt}.sq{display:inline-block;width:6pt;height:6pt;margin-right:3pt}.ch{color:#fff;padding:0 4pt;border-radius:6pt;font-size:8pt;font-style:normal;-webkit-print-color-adjust:exact;print-color-adjust:exact}.t{-webkit-print-color-adjust:exact;print-color-adjust:exact}.t i{color:#444;font-style:normal;font-weight:600;font-size:8.5pt}
+.t.d{opacity:.5;text-decoration:line-through}.sl{border:0.5pt solid #999;padding:0 3pt;border-radius:2pt;font-size:8pt;font-style:normal;color:#222}.aw{font-size:8.5pt;margin-bottom:2pt;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.lev{margin-top:6pt;display:flex;flex-wrap:wrap;gap:4pt 14pt;font-size:9.5pt}
+.lev b{font-size:10pt}
+.lev span{border-left:4pt solid #888;padding-left:4pt}
+.nb{border:1pt solid #111;border-left:5pt solid #111;padding:4pt 6pt;margin-bottom:6pt;font-size:10.5pt;white-space:pre-wrap}
+.ft{margin-top:4pt;font-size:8pt;color:#666}
+@media screen{body{padding:12mm;max-width:297mm;margin:auto}}
+</style></head><body>
+<div class="hd"><div><div class="sub">Grindberg Trevarefabrikk</div><h1>Produksjonsplan · Uke ${isoWeek(S.week)}</h1></div><div class="sub">${short(days[0])} – ${short(days[days.length-1])} ${days[days.length-1].getFullYear()}</div></div>
+${note?`<div class="nb"><b>Beskjed:</b> ${esc(note)}</div>`:""}
+<table><thead><tr><th class="st">${pm?"Ansatt":"Stasjon"}</th>${days.map(d=>`<th>${DAYS[(d.getDay()+6)%7]} ${short(d)}</th>`).join("")}</tr></thead>
+<tbody>${bodyRows}</tbody></table>
+${act.length?`<div class="lev"><b>Leveranser:</b>${act.map(o=>`<span style="border-left-color:${col(o)}"><b>${esc(oLabel(o))}</b>${o.hva?" – "+esc(o.hva):""}${o.levering?" · lev. "+short(parse(o.levering)):""}</span>`).join("")}</div>`:""}
+<div class="ft">Skrevet ut ${now.getDate()}. ${MONTHS[now.getMonth()]} ${now.getFullYear()} kl. ${pad(now.getHours())}:${pad(now.getMinutes())}. Planen kan ha endret seg siden – sjekk den delte planen.</div>
+<script>window.addEventListener("load",function(){setTimeout(function(){window.print()},300)})<\/script>
+</body></html>`;
+}
+async function downloadPrint(){
+  if(!S.dl)return;
+  try{await S.dl.save({filename:"Produksjonsplan uke "+isoWeek(S.week)+".html",data:printHtml()});toast("Fila er lagret. Åpne den for å skrive ut.")}
+  catch(e){if(e&&e.code==="declined")return;if(e&&e.code==="rate_limited"){toast("Vent litt og prøv igjen");return}toast("Nedlasting er ikke tilgjengelig her")}
+}
+
+/* ---------- Excel ---------- */
+const XL_PAL=["FF2F6FB3","FFC2571A","FF2E8A57","FF8A3FA8","FFB8872A","FFC23B6B","FF3A8F9A","FF6B6F2A"];
+function xlColor(o){return o?XL_PAL[((o.farge!=null?o.farge:7))%8]:"FF999999"}
+async function buildWorkbook(){
+  if(!window.ExcelJS)throw {code:"nolib"};
+  const wb=new ExcelJS.Workbook();wb.creator="Grindberg Trevarefabrikk";wb.created=new Date();
+  const now=new Date();const stamp=now.getDate()+". "+MONTHS[now.getMonth()]+" kl. "+pad(now.getHours())+":"+pad(now.getMinutes());
+  const thin={style:"thin",color:{argb:"FF8A8F8B"}};const border={top:thin,left:thin,bottom:thin,right:thin};
+  const sts=stations();
+  const start=monday(new Date());
+  const act=S.ordre.filter(o=>o.status!=="levert").sort((a,b)=>(a.levering||"9").localeCompare(b.levering||"9"));
+  for(let w=0;w<4;w++){
+    const wk=addDays(start,7*w);const days=Array.from({length:5},(_,i)=>addDays(wk,i));
+    const ws=wb.addWorksheet((w===0?"Denne uka":"Uke "+isoWeek(wk)),{pageSetup:{paperSize:9,orientation:"landscape",fitToPage:true,fitToWidth:1,fitToHeight:1,margins:{left:0.3,right:0.3,top:0.4,bottom:0.4,header:0.2,footer:0.2}},views:[{state:"frozen",ySplit:5,xSplit:1}]});
+    ws.columns=[{width:18},...days.map(()=>({width:34}))];
+    ws.mergeCells(1,1,1,6);const t=ws.getCell(1,1);t.value="Produksjonsplan · Uke "+isoWeek(wk);t.font={bold:true,size:18};
+    ws.mergeCells(2,1,2,6);ws.getCell(2,1).value="Grindberg Trevarefabrikk · "+short(days[0])+" – "+short(days[4])+" "+days[4].getFullYear()+" · Oppdatert "+stamp;ws.getCell(2,1).font={size:10,color:{argb:"FF555555"}};
+    const note=((S.uker[weekKey(wk)]||{}).tekst)||"";
+    ws.mergeCells(3,1,3,6);const nc=ws.getCell(3,1);
+    if(note){nc.value="Beskjed: "+note;nc.font={bold:true,size:12};nc.fill={type:"pattern",pattern:"solid",fgColor:{argb:"FFFCE9A6"}};nc.alignment={wrapText:true,vertical:"top"};ws.getRow(3).height=Math.min(120,18*Math.max(1,Math.ceil(note.length/150)+(note.split("\n").length-1)))}
+    const hr=ws.getRow(5);hr.height=22;
+    ["Stasjon",...days.map(d=>DAYS[(d.getDay()+6)%7]+" "+short(d))].forEach((v,i)=>{const c=hr.getCell(i+1);c.value=v;c.font={bold:true,size:12};c.fill={type:"pattern",pattern:"solid",fgColor:{argb:"FFE2E6E1"}};c.border=border;c.alignment={vertical:"middle"}});
+    days.forEach((d,i)=>{if(iso(d)===TODAY){const c=hr.getCell(i+2);c.fill={type:"pattern",pattern:"solid",fgColor:{argb:"FFF2C230"}}}});
+    const rows=rowDefs(days),pm=rowMode()==="ansatte";hr.getCell(1).value=pm?"Ansatt":"Stasjon";
+    const wl=t=>String(t||"").split("\n").reduce((a,p)=>a+Math.max(1,Math.ceil(p.length/34)),0);
+    rows.forEach((rd,ri)=>{
+      const r=ws.getRow(6+ri);let maxLines=rd.borte?1:2;
+      r.getCell(1).value=rd.label;r.getCell(1).font={bold:true,size:12,color:{argb:rd.pi>=0?"FF"+PHEX[rd.pi]:"FF1D2320"}};
+      r.getCell(1).fill={type:"pattern",pattern:"solid",fgColor:{argb:rd.borte?"FFF6DEDA":(rd.pi>=0?"FF"+PTINT[rd.pi]:"FFE2E6E1")}};
+      days.forEach((d,i)=>{
+        const di=iso(d);const fs=rd.away?rd.away(di):[];const ts=rd.list(di);const rich=[];let lines=0;
+        fs.forEach((f,k)=>{const pi=pIdx(f.hvem);if(rich.length)rich.push({text:"\n"});rich.push({text:(rd.person?"BORTE: ":f.hvem+" – ")+(f.type||"Borte")+(f.notat?" ("+f.notat+")":""),font:{bold:true,color:{argb:rd.person?"FFB3261E":"FF"+(pi>=0?PHEX[pi]:"555555")}}});lines+=1});
+        ts.forEach(tk=>{const o=orderById(tk.ordreId);const strike=!!tk.ferdig;const tp=rd.person?rd.pi:pIdx(names(tk)[0]);const mk=tp>=0?"FF"+PHEX[tp]:null;
+          if(rich.length){rich.push({text:"\n"});lines+=0.4}
+          if(o){rich.push({text:(tk.ferdig?"✔ ":"■ "),font:{color:{argb:mk||xlColor(o)},bold:true}});rich.push({text:oLabel(o),font:{bold:true,strike}});lines+=wl("xx "+oLabel(o));if(tk.tekst){rich.push({text:"\n"+tk.tekst,font:{strike}});lines+=wl(tk.tekst)}}
+          else{rich.push({text:(tk.ferdig?"✔ ":"■ "),font:{color:{argb:mk||"FF999999"},bold:true}});rich.push({text:tk.tekst||"Oppgave",font:{bold:true,strike}});lines+=wl("xx "+(tk.tekst||"Oppgave"))}
+          const others=rd.person?names(tk).filter(n=>n!==rd.person):names(tk);const sn=rd.person?stName2(tk.stasjon):"";
+          if(sn||others.length){rich.push({text:"\n"});if(sn)rich.push({text:"["+sn+"]"+(others.length?" med ":""),font:{color:{argb:"FF555555"},strike}});
+            others.forEach((n,ni)=>{const k=pIdx(n);rich.push({text:(ni?", ":"")+n,font:{bold:true,color:{argb:"FF"+(k>=0?PHEX[k]:"555555")},strike}})});lines+=1}});
+        const c=r.getCell(i+2);if(rich.length)c.value={richText:rich};c.alignment={wrapText:true,vertical:"top"};
+        if(rd.borte)c.fill={type:"pattern",pattern:"solid",fgColor:{argb:"FFFBF0EE"}};
+        else if(rd.person&&fs.length)c.fill={type:"pattern",pattern:"solid",fgColor:{argb:"FFFBE4E1"}};
+        else if(rd.person&&ts.length)c.fill={type:"pattern",pattern:"solid",fgColor:{argb:"FF"+PTINT[rd.pi]}};
+        else if(!rd.person){const pis=[...new Set(ts.map(tk=>pIdx(names(tk)[0])))];
+          if(ts.length&&pis.length===1&&pis[0]>=0){c.fill={type:"pattern",pattern:"solid",fgColor:{argb:"FF"+PTINT[pis[0]]}};c.border={...border,left:{style:"thick",color:{argb:"FF"+PHEX[pis[0]]}}}}
+          else if(di===TODAY)c.fill={type:"pattern",pattern:"solid",fgColor:{argb:"FFFFF8DE"}}}
+        else if(di===TODAY)c.fill={type:"pattern",pattern:"solid",fgColor:{argb:"FFFFF8DE"}};
+        maxLines=Math.max(maxLines,Math.ceil(lines*1.1));
+      });
+      r.height=Math.min(409,Math.max(rd.borte?22:30,15*maxLines+8));
+      for(let c=1;c<=6;c++)if(!r.getCell(c).border||!r.getCell(c).border.left)r.getCell(c).border=border;
+      r.getCell(1).alignment={vertical:"top"};
+    });
+    let row=6+rows.length+1;
+    if(act.length){
+      ws.getCell(row,1).value="Leveranser";ws.getCell(row,1).font={bold:true,size:13};row++;
+      act.forEach(o=>{const n=o.levering?daysBetween(new Date(),parse(o.levering)):null;
+        ws.getCell(row,1).value=o.nr||"";ws.getCell(row,1).font={bold:true,color:{argb:xlColor(o)}};
+        ws.mergeCells(row,2,row,4);ws.getCell(row,2).value=(o.navn||"")+(o.hva?" – "+o.hva:"");
+        ws.getCell(row,5).value=o.levering?"Lev. "+short(parse(o.levering))+" "+parse(o.levering).getFullYear():"Ingen dato";
+        ws.getCell(row,6).value=n==null?"":(n<0?Math.abs(n)+" dager over":n===0?"I dag":"Om "+n+" dager");
+        if(n!=null&&n<=7)ws.getCell(row,6).font={bold:true,color:{argb:n<=0?"FFB3261E":"FF8A5A00"}};
+        row++});
+    }
+    ws.headerFooter.oddFooter="&L Grindberg Trevarefabrikk &R Side &P av &N";
+  }
+  const wo=wb.addWorksheet("Ordre",{pageSetup:{paperSize:9,orientation:"landscape",fitToPage:true,fitToWidth:1,fitToHeight:0}});
+  wo.columns=[{header:"Ordrenr.",key:"nr",width:14},{header:"Kunde / prosjekt",key:"navn",width:28},{header:"Hva",key:"hva",width:30},{header:"Levering",key:"lev",width:14},{header:"Status",key:"st",width:10},{header:"Jobber ferdig",key:"jf",width:14},{header:"Notat",key:"no",width:44}];
+  const all=[...act,...S.ordre.filter(o=>o.status==="levert").sort((a,b)=>(b.levering||"").localeCompare(a.levering||""))];
+  all.forEach(o=>{const ts=S.oppg.filter(t=>t.ordreId===o.id);const r=wo.addRow({nr:o.nr||"",navn:o.navn||"",hva:o.hva||"",lev:o.levering?parse(o.levering):"",st:o.status==="levert"?"Levert":"Aktiv",jf:ts.length?ts.filter(t=>t.ferdig).length+" / "+ts.length:"",no:o.notat||""});
+    r.getCell("lev").numFmt="dd.mm.yyyy";r.alignment={vertical:"top",wrapText:true};r.getCell("nr").font={bold:true,color:{argb:xlColor(o)}}});
+  wo.getRow(1).font={bold:true};wo.getRow(1).fill={type:"pattern",pattern:"solid",fgColor:{argb:"FFE2E6E1"}};
+  const wt=wb.addWorksheet("Timer");
+  wt.columns=[{header:"Dato",key:"d",width:12},{header:"Ansatt",key:"a",width:14},{header:"Ordrenr.",key:"nr",width:12},{header:"Kunde",key:"k",width:28},{header:"Timer",key:"t",width:9},{header:"Kommentar",key:"c",width:44}];
+  S.timer.slice().sort((a,b)=>(a.dato||"").localeCompare(b.dato||"")).forEach(x=>{const o=orderById(x.ordreId);const r=wt.addRow({d:x.dato?parse(x.dato):"",a:x.hvem||"",nr:o?o.nr||"":"",k:o?o.navn||"":"",t:Number(x.timer)||0,c:x.kommentar||""});r.getCell("d").numFmt="dd.mm.yyyy";r.getCell("t").numFmt="0.00"});
+  wt.getRow(1).font={bold:true};wt.getRow(1).fill={type:"pattern",pattern:"solid",fgColor:{argb:"FFE2E6E1"}};wt.views=[{state:"frozen",ySplit:1}];if(S.timer.length)wt.autoFilter={from:"A1",to:"F1"};
+  wo.views=[{state:"frozen",ySplit:1}];if(all.length)wo.autoFilter={from:"A1",to:"G1"};
+  return wb;
+}
+function b64(buf){const bytes=new Uint8Array(buf);let s="";const CH=0x8000;for(let i=0;i<bytes.length;i+=CH)s+=String.fromCharCode.apply(null,bytes.subarray(i,i+CH));return btoa(s)}
+async function downloadExcel(){
+  if(!S.dl)return;
+  try{const wb=await buildWorkbook();const buf=await wb.xlsx.writeBuffer();
+    await S.dl.save({filename:"Produksjonsplan Grindberg.xlsx",data:new Blob([buf])});toast("Excel-fila er lagret")}
+  catch(e){if(e&&e.code==="declined")return;toast(e&&e.code==="nolib"?"Excel-verktøyet lastet ikke. Last siden på nytt.":"Fikk ikke laget Excel-fila")}
+}
+let syncing=false;
+async function syncExcel(){
+  const x=S.excel;if(!S.mcp||!x||!x.driveId||syncing)return;
+  syncing=true;S.syncMsg="Sender til OneDrive …";refreshExcelPanel();
+  try{
+    const wb=await buildWorkbook();const buf=await wb.xlsx.writeBuffer();
+    const res=await S.mcp.callTool("Microsoft 365","sharepoint_upload_file",{driveId:x.driveId,parentItemId:x.parentItemId||null,filename:x.filnavn||"Produksjonsplan Grindberg.xlsx",conflictBehavior:"replace",contentBase64:b64(buf)},{cache:false});
+    const p=res&&res.payload||{};const url=p.webUrl||(p.item&&p.item.webUrl)||x.webUrl||"";
+    await S.db.doc("oppsett/excel").set({...x,webUrl:url,sist:Date.now()});
+    S.syncMsg="";toast("Excel i OneDrive er oppdatert");
+  }catch(e){
+    const raw=JSON.stringify((e&&e.result)||e||{});
+    if(/Files\.ReadWrite|accessDenied|FORBIDDEN/i.test(raw))S.syncMsg="Microsoft 365-koblingen har bare lesetilgang. Gi den skrivetilgang (se under), så virker knappen.";
+    else if(e&&e.code==="not_in_manifest")S.syncMsg="Siden har ikke fått lov til å bruke Microsoft 365. Tillat det i sidens tillatelser og prøv igjen.";
+    else if(e&&(e.code==="server_not_connected"||e.code==="needs_reauth"))S.syncMsg="Koble til Microsoft 365 i claude.ai under Innstillinger → Koblinger.";
+    else if(e&&e.code==="approval_required")S.syncMsg="Opplastingen trenger godkjenning. Trykk knappen igjen og godkjenn.";
+    else if(e&&e.code==="nolib")S.syncMsg="Excel-verktøyet lastet ikke. Last siden på nytt.";
+    else S.syncMsg="Fikk ikke sendt til OneDrive. Prøv igjen om litt.";
+    if(S.view!=="st")toast(S.syncMsg);
+  }finally{syncing=false;refreshExcelPanel();renderHead()}
+}
+let excelBox=null;
+function renderExcelPanel(){excelBox=h("div",{style:"display:flex;flex-direction:column;gap:10px;margin-top:18px"});refreshExcelPanel();return excelBox}
+function refreshExcelPanel(){
+  if(!excelBox)return;const x=S.excel||{};
+  const kids=[h("div",{class:"sec-h"},h("h2",{text:"Excel for de ansatte"}),h("span",{text:"Uka + tre uker fram og ordrelista"})),
+    h("p",{class:"hint",style:"margin:0",text:"Excel-fila ligger i OneDrive og deles med «Alle med koblingen». Da kan de ansatte åpne den uten konto. Trykk «Oppdater Excel» når du har gjort endringer her."})];
+  if(x.sist){const d=new Date(x.sist);kids.push(h("p",{style:"margin:0;font-size:14px"},"Sist oppdatert "+d.getDate()+". "+MONTHS[d.getMonth()]+" kl. "+pad(d.getHours())+":"+pad(d.getMinutes())))}
+  if(x.webUrl)kids.push(h("p",{style:"margin:0;font-size:14px;overflow-wrap:anywhere"},"Fila i OneDrive: ",h("a",{href:x.webUrl,target:"_blank",rel:"noopener",text:"Åpne Produksjonsplan Grindberg.xlsx"})));
+  if(S.syncMsg)kids.push(h("div",{class:"notice"+(/ikke|bare|Koble|Fikk/.test(S.syncMsg)?" err":""),text:S.syncMsg}));
+  kids.push(h("div",{class:"acts"},
+    S.dl?h("button",{class:"btn",type:"button",text:"Last ned Excel",onclick:downloadExcel}):h("span"),
+    h("div",{class:"r"},S.isOwner&&x.driveId?h("button",{class:"btn primary",type:"button",text:syncing?"Sender …":"Oppdater Excel i OneDrive",disabled:syncing||!S.mcp||null,onclick:syncExcel}):null)));
+  if(S.isOwner&&!S.mcp)kids.push(null);
+  if(S.isOwner){
+    const code=S.tilgang&&S.tilgang.kode;
+    kids.push(h("div",{class:"sec-h",style:"margin-top:18px"},h("h2",{text:"App for de ansatte"}),h("span",{text:"plan.grindberg.no"})));
+    kids.push(h("p",{class:"hint",style:"margin:0",text:"De ansatte åpner plan.grindberg.no og skriver inn koden én gang. Bytter du kode, blir alle logget ut og må skrive inn den nye."}));
+    if(code){const cv=h("code",{style:"font-family:var(--mono);font-size:20px;font-weight:500;background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:6px 12px;user-select:all",text:code});
+      kids.push(h("div",{style:"display:flex;flex-wrap:wrap;gap:8px;align-items:center"},h("span",{class:"lb",style:"font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)",text:"Kode"}),cv,
+        h("button",{class:"btn",type:"button",text:"Kopier",onclick:()=>{navigator.clipboard.writeText(code).then(()=>toast("Koden er kopiert"),()=>{const r=document.createRange();r.selectNodeContents(cv);const sel=getSelection();sel.removeAllRanges();sel.addRange(r);toast("Merket – kopier med Cmd+C")})}})));}
+    const cf=h("div");
+    kids.push(cf,h("div",{class:"acts"},h("div",{class:"r"},h("button",{class:"btn",type:"button",text:code?"Lag ny kode":"Lag kode",onclick:()=>{
+      const go=async()=>{const w=["furu","bjork","eik","ask","gran","hovel","lakk","skrue","plank","list","kant","fres","sag","lim","olje","benk","skap","dor","skuff","hylle","krok","vinkel","meisel","tommer","spon","bord","ramme","stol","kubbe","planke"];
+        const r=new Uint32Array(3);crypto.getRandomValues(r);const nk=w[r[0]%w.length]+"-"+(1000+r[1]%9000)+"-"+w[r[2]%w.length];
+        try{await S.db.doc("oppsett/tilgang").set({kode:nk,endret:Date.now()});toast("Ny kode er tatt i bruk")}catch(e){toast(writeErr(e))}};
+      if(!code){go();return}
+      cf.replaceChildren(h("div",{class:"confirm"},"Alle må logge inn på nytt.",h("button",{class:"btn danger",type:"button",text:"Lag ny kode",onclick:go}),h("button",{class:"btn",type:"button",text:"Avbryt",onclick:()=>cf.replaceChildren()})))}}))));
+  }
+  excelBox.replaceChildren(...kids);
+}
+function markDirty(){if(S.excel&&S.excel.sist)S.dirty=true}
+
+/* ---------- hendelser ---------- */
+$("prevWk").onclick=()=>{S.week=addDays(S.week,-7);render()};
+$("nextWk").onclick=()=>{S.week=addDays(S.week,7);render()};
+$("thisWk").onclick=()=>{S.week=monday(new Date());render()};
+$("vUke").onclick=()=>{S.view="uke";render()};
+$("vOrdre").onclick=()=>{S.view="ordre";render()};
+$("vSt").onclick=()=>{S.view="st";render()};
+$("printBtn").onclick=downloadPrint;
+try{S.rows=localStorage.getItem("gb-rows")||"ansatte"}catch(e){S.rows="ansatte"}
+$("rAns").onclick=()=>{S.rows="ansatte";try{localStorage.setItem("gb-rows","ansatte")}catch(e){}render()};
+$("rSt").onclick=()=>{S.rows="stasjoner";try{localStorage.setItem("gb-rows","stasjoner")}catch(e){}render()};
+$("excelBtn").onclick=()=>{(S.isOwner&&S.mcp&&S.excel&&S.excel.driveId)?syncExcel():downloadExcel()};
+
+render();
+
+/* ---------- oppstart ---------- */
+(async function boot(){
+  try{
+    const [db,user,dl]=await Promise.all([claude.use("db"),claude.use("user"),claude.use("downloads")]);
+    S.db=db;S.user=user;S.dl=dl;
+    S.isOwner=user?await user.isOwner():false;
+    if(S.isOwner)claude.use("mcp").then(m=>{S.mcp=m;renderHead();if(S.view==="st")refreshExcelPanel()});
+    if(!db){S.err="Planen er ikke tilgjengelig her. Åpne lenken i claude.ai mens du er logget inn.";render();return}
+    const cw=user?await user.can("data.write"):null;
+    S.canWrite=cw===null?true:!!cw;
+    db.doc("oppsett/stasjoner").onSnapshot(s=>{S.stLoaded=true;const d=s.exists?s.data():null;S.st=d&&Array.isArray(d.liste)?d.liste:null;if(S.view!=="st")render();else renderHead()},()=>{});
+    db.collection("ordre").onSnapshot(s=>{S.oLoaded=true;S.ordre=s.docs.map(d=>({id:d.id,...d.data()}));render()},e=>{S.err="Mistet kontakten med planen. Last siden på nytt.";render()});
+    db.doc("oppsett/ansatte").onSnapshot(s=>{const d=s.exists?s.data():null;S.ansatte=d&&Array.isArray(d.liste)?d.liste:[];S.farger=d&&d.farger||{};if(S.view!=="st")render()},()=>{});
+    db.doc("oppsett/excel").onSnapshot(s=>{S.excel=s.exists?s.data():null;if(S.view==="st")refreshExcelPanel()},()=>{});
+    db.collection("timer").onSnapshot(s=>{S.timer=s.docs.map(d=>({id:d.id,...d.data()}));if(S.view==="ordre")render()},()=>{});
+    db.collection("tripletex").onSnapshot(s=>{S.tripletex=s.docs.map(d=>({id:d.id,...d.data()}));if(S.view==="ordre")render()},()=>{});
+    db.collection("fravaer").onSnapshot(s=>{S.fravaer=s.docs.map(d=>({id:d.id,...d.data()}));if(S.view!=="st")render()},()=>{});
+    if(S.isOwner)db.doc("oppsett/tilgang").onSnapshot(s=>{S.tilgang=s.exists?s.data():null;if(S.view==="st")refreshExcelPanel()},()=>{});
+    db.collection("uker").onSnapshot(s=>{const m={};s.docs.forEach(d=>{m[d.id]=d.data()});S.uker=m;render()},()=>{});
+    db.collection("oppgaver").onSnapshot(s=>{S.tLoaded=true;S.oppg=s.docs.map(d=>({id:d.id,...d.data()}));if(S.view!=="st")render()},e=>{S.err="Mistet kontakten med planen. Last siden på nytt.";render()});
+  }catch(e){S.err="Planen kunne ikke lastes. Last siden på nytt.";render()}
+})();
+})();
+</script>
+
+</body></html>

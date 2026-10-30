@@ -1,5 +1,9 @@
 # Arbeidsplan Grindberg
 
-Mobilvennlig arbeidsplan for verkstedet på Grindberg Trevarefabrikk, publisert på https://plan.grindberg.no.
+Arbeidsplan for verkstedet på Grindberg Trevarefabrikk – https://plan.grindberg.no
 
-Siden bygges fra den delte produksjonsplanen med `python3 build/build.py <db-eksport> .` og legges ut med GitHub Pages fra `main`.
+- `index.html` – appen for de ansatte (logg inn med ansattkoden).
+- `leder/` – planleggingen for leder (logg inn med lederkode).
+
+Sidene inneholder ingen data. Alt hentes fra serveren `grindberg-plan.grindberg.workers.dev`
+(Cloudflare Worker + D1) etter innlogging, og oppdateres automatisk.
