@@ -190,6 +190,10 @@ table.board{border-collapse:collapse;width:100%;min-width:900px;table-layout:fix
 .daypick label{display:inline-flex;align-items:center;gap:5px;border:1px solid var(--line);border-radius:6px;padding:6px 9px;font-size:14px;text-transform:none;letter-spacing:0;color:var(--ink);font-weight:600;cursor:pointer}
 .daypick input{width:auto;min-height:0}
 .acts{display:flex;flex-wrap:wrap;gap:8px;justify-content:space-between;align-items:center}
+.msglist{display:flex;flex-direction:column;gap:8px}
+.msgrow{display:flex;gap:10px;align-items:flex-start;justify-content:space-between;border:1px solid var(--line);border-radius:8px;padding:9px 11px}
+.msgmeta{font-size:12.5px;color:var(--muted)}
+.msgtxt{white-space:pre-wrap;overflow-wrap:anywhere;font-size:14.5px;margin-top:2px}
 .acts .r{display:flex;gap:8px;margin-left:auto}
 .confirm{display:flex;flex-wrap:wrap;align-items:center;gap:8px;background:var(--danger-bg);color:var(--danger);border-radius:6px;padding:8px 10px;font-size:14px;font-weight:600}
 .hint{font-size:13px;color:var(--muted)}
@@ -229,10 +233,9 @@ table.board{border-collapse:collapse;width:100%;min-width:900px;table-layout:fix
       <div class="seg" role="group" aria-label="Rader"><button id="rAns" type="button">Ansatte</button><button id="rSt" type="button">Stasjoner</button></div>
       <button id="printBtn" class="btn" type="button" hidden>Last ned for utskrift</button>
       <button id="excelBtn" class="btn" type="button" hidden>Excel</button>
+      <button id="msgBtn" class="btn primary" type="button" hidden>✉ Send beskjed</button>
     </div>
   </header>
-
-  <div class="notice err" style="font-size:15px"><b>Planen er flyttet.</b> Planlegg nå på <a href="http://plan.grindberg.no/leder/" target="_blank" rel="noopener">plan.grindberg.no/leder</a>. Der ser de ansatte endringene med en gang. Det du endrer her, vises ikke for dem lenger.</div>
   <div id="status" class="notice">Henter planen …</div>
 
   <section class="note" id="noteSec" hidden></section>
@@ -355,6 +358,7 @@ function renderHead(){
   $("printBtn").hidden=!S.dl;
   const canSync=S.isOwner&&S.mcp&&S.excel&&S.excel.driveId;
   $("excelBtn").hidden=!(canSync||(S.dl&&S.canWrite));
+  $("msgBtn").hidden=!(S.canWrite&&S.hasMsg);
   $("excelBtn").textContent=canSync?(syncing?"Sender …":"Oppdater Excel"):"Last ned Excel";
   $("excelBtn").disabled=syncing;
   const st=$("status");
@@ -608,6 +612,32 @@ function render(){
   renderHead();if(!S.noteEdit||S.noteKey!==weekKey(S.week)){S.noteEdit=false;renderNote()}renderDeliveries();
   const m=$("main");
   m.replaceChildren(...(S.view==="ordre"?renderOrders():S.view==="st"&&S.canWrite?renderStations():renderWeek()));
+}
+
+/* ---------- beskjeder til ansatte ---------- */
+function msgWhen(t){const d=new Date(t);const td=new Date();const same=d.toDateString()===td.toDateString();return (same?"i dag":short(d))+" kl. "+String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0")}
+function openMsg(pre){
+  const names=(S.ansatte&&S.ansatte.length?S.ansatte:people());
+  const til=h("select",{id:"m-til"},h("option",{value:"*",text:"Alle ansatte"}),names.map(n=>h("option",{value:n,text:n,selected:pre===n||null})));
+  const ta=h("textarea",{id:"m-txt",rows:"4",maxlength:"1500",placeholder:"Skriv beskjeden …"});
+  const err=h("p",{class:"hint",style:"color:var(--danger,#a33)",hidden:true});
+  const send=h("button",{class:"btn primary",type:"button",text:"Send"});
+  send.onclick=async()=>{const txt=ta.value.trim();if(!txt){err.textContent="Skriv en beskjed først.";err.hidden=false;ta.focus();return}
+    send.disabled=true;send.textContent="Sender …";
+    try{await S.db.collection("beskjeder").add({til:til.value,tekst:txt,fra:(window.gbMe&&gbMe().navn)||"Alexander",tid:Date.now()});closeOv();toast(til.value==="*"?"Beskjed sendt til alle":"Beskjed sendt til "+til.value)}
+    catch(e){send.disabled=false;send.textContent="Send";err.textContent=writeErr(e);err.hidden=false}};
+  const sent=(S.beskjeder||[]).slice().sort((a,b)=>(b.tid||0)-(a.tid||0)).slice(0,25);
+  const list=sent.length?h("div",{class:"msglist"},sent.map(m=>h("div",{class:"msgrow"},
+      h("div",{},h("div",{class:"msgmeta",text:(m.til==="*"?"Til alle":"Til "+m.til)+" · "+msgWhen(m.tid)}),h("div",{class:"msgtxt",text:m.tekst})),
+      h("button",{class:"btn ghost",type:"button",text:"Slett","aria-label":"Slett beskjed",onclick:async(e)=>{const b=e.currentTarget;if(!b.dataset.c){b.dataset.c="1";b.textContent="Sikker?";return}try{await S.db.doc("beskjeder/"+m.id).delete();toast("Beskjed slettet");openMsg(til.value)}catch(x){toast(writeErr(x))}}})))):h("p",{class:"hint",text:"Ingen beskjeder sendt ennå."});
+  sheet("Send beskjed",[
+    h("div",{class:"f"},h("label",{for:"m-til",text:"Til"}),til),
+    h("div",{class:"f"},h("label",{for:"m-txt",text:"Beskjed"}),ta),
+    h("p",{class:"hint",text:"Den det gjelder får varsel på telefonen hvis varsler er slått på. Beskjeden oversettes automatisk for dem som har valgt engelsk eller ukrainsk. Alle bruker samme kode, så ikke skriv noe som er hemmelig."}),
+    err,
+    h("div",{class:"acts"},h("button",{class:"btn ghost",type:"button",text:"Avbryt",onclick:closeOv}),send),
+    h("h3",{text:"Sendt",style:"margin:6px 0 0;font-size:15px"}),list]);
+  setTimeout(()=>ta.focus(),40);
 }
 
 /* ---------- skjema: jobb ---------- */
@@ -1003,6 +1033,7 @@ $("printBtn").onclick=downloadPrint;
 try{S.rows=localStorage.getItem("gb-rows")||"ansatte"}catch(e){S.rows="ansatte"}
 $("rAns").onclick=()=>{S.rows="ansatte";try{localStorage.setItem("gb-rows","ansatte")}catch(e){}render()};
 $("rSt").onclick=()=>{S.rows="stasjoner";try{localStorage.setItem("gb-rows","stasjoner")}catch(e){}render()};
+$("msgBtn").onclick=()=>openMsg();
 $("excelBtn").onclick=()=>{(S.isOwner&&S.mcp&&S.excel&&S.excel.driveId)?syncExcel():downloadExcel()};
 
 render();
@@ -1025,6 +1056,7 @@ render();
     db.collection("tripletex").onSnapshot(s=>{S.tripletex=s.docs.map(d=>({id:d.id,...d.data()}));if(S.view==="ordre")render()},()=>{});
     db.collection("fravaer").onSnapshot(s=>{S.fravaer=s.docs.map(d=>({id:d.id,...d.data()}));if(S.view!=="st")render()},()=>{});
     if(S.isOwner)db.doc("oppsett/tilgang").onSnapshot(s=>{S.tilgang=s.exists?s.data():null;if(S.view==="st")refreshExcelPanel()},()=>{});
+    try{db.collection("beskjeder").onSnapshot(s=>{S.beskjeder=s.docs.map(d=>({id:d.id,...d.data()}));S.hasMsg=!!window.gbMe;renderHead()},()=>{})}catch(e){}
     db.collection("uker").onSnapshot(s=>{const m={};s.docs.forEach(d=>{m[d.id]=d.data()});S.uker=m;render()},()=>{});
     db.collection("oppgaver").onSnapshot(s=>{S.tLoaded=true;S.oppg=s.docs.map(d=>({id:d.id,...d.data()}));if(S.view!=="st")render()},e=>{S.err="Mistet kontakten med planen. Last siden på nytt.";render()});
   }catch(e){S.err="Planen kunne ikke lastes. Last siden på nytt.";render()}
