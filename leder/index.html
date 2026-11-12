@@ -191,6 +191,10 @@ table.board{border-collapse:collapse;width:100%;min-width:900px;table-layout:fix
 .daypick input{width:auto;min-height:0}
 .acts{display:flex;flex-wrap:wrap;gap:8px;justify-content:space-between;align-items:center}
 .msglist{display:flex;flex-direction:column;gap:8px}
+.txbar{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;justify-content:space-between;border:1px solid var(--line);border-radius:8px;padding:9px 12px;background:var(--paper);font-size:14px}
+.txbar.bad{border-color:var(--danger,#a33)}
+.txbar .txa{display:flex;gap:8px}
+.steps{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:4px;font-size:14.5px}
 .msgrow{display:flex;gap:10px;align-items:flex-start;justify-content:space-between;border:1px solid var(--line);border-radius:8px;padding:9px 11px}
 .msgmeta{font-size:12.5px;color:var(--muted)}
 .msgtxt{white-space:pre-wrap;overflow-wrap:anywhere;font-size:14.5px;margin-top:2px}
@@ -310,6 +314,7 @@ table.board{border-collapse:collapse;width:100%;min-width:900px;table-layout:fix
   var downloads={save:function(o){var b=o.data instanceof Blob?o.data:new Blob([o.data]);var u=URL.createObjectURL(b);var a=document.createElement("a");a.href=u;a.download=o.filename;document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(u);a.remove()},2000);return Promise.resolve({status:"saved"})}};
   window.gbLogout=function(){setCode("");location.reload()};
   window.gbMe=function(){return me};
+  window.gbApi=function(m,p,b){return req(m,p,b)};
   window.claude={use:function(name){return ready.then(function(){if(name==="db")return db;if(name==="user")return user;if(name==="downloads")return downloads;return null})}};
 })();
 
@@ -517,17 +522,56 @@ async function importTx(c){
     await S.db.doc("tripletex/"+c.id).update({importert:true});toast("Ordre "+c.nr+" er tatt inn");
   }catch(e){toast(writeErr(e))}
 }
+/* ---------- Tripletex-kobling ---------- */
+function txFetchStatus(force){if(!window.gbApi)return;if(!force&&S.txstT&&Date.now()-S.txstT<60e3)return;S.txstT=Date.now();
+  gbApi("GET","tripletex/status").then(st=>{S.txst=st;if(S.view==="ordre")render()}).catch(()=>{})}
+function txWhen(t){if(!t)return "";const d=new Date(t);return (d.toDateString()===new Date().toDateString()?"i dag":short(d))+" kl. "+String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0")}
+function txSyncNow(btn){if(btn){btn.disabled=true;btn.textContent="Henter …"}
+  return gbApi("POST","tripletex/sync").then(st=>{S.txst=st;toast(st.ok?(st.nye?st.nye+" nye ordre hentet":"Ingen nye ordre"):"Fikk ikke hentet: "+(st.feil||"ukjent feil"));render()}).catch(e=>{toast("Fikk ikke hentet ordre");if(btn){btn.disabled=false;btn.textContent="Hent nå"}})}
+function txBar(){
+  if(!window.gbApi)return null;txFetchStatus();const st=S.txst;
+  if(!st)return h("p",{class:"hint",style:"margin:0",text:"Sjekker Tripletex-koblingen …"});
+  if(!st.koblet)return h("div",{class:"txbar"},h("span",{text:"Planen er ikke koblet til Tripletex ennå. Kobler du den til, hentes nye ordre automatisk."}),h("button",{class:"btn primary",type:"button",text:"Koble til Tripletex",onclick:openTxKey}));
+  const b=h("button",{class:"btn",type:"button",text:"Hent nå"});b.onclick=()=>txSyncNow(b);
+  return h("div",{class:"txbar"+(st.ok===false?" bad":"")},
+    h("span",{},st.ok===false?h("b",{text:"Siste henting feilet: "}):null,st.ok===false?(st.feil||""):"Nye ordre hentes automatisk fra Tripletex hver halvtime på dagtid."+(st.sist?" Sist hentet "+txWhen(st.sist)+".":"")),
+    h("span",{class:"txa"},b,h("button",{class:"btn ghost",type:"button",text:"Nøkkel",onclick:openTxKey})));
+}
+function openTxKey(){
+  const st=S.txst||{};
+  const inp=h("input",{id:"tx-key",type:"password",autocomplete:"off",spellcheck:"false",placeholder:"Lim inn API-nøkkelen"});
+  const err=h("p",{class:"hint",style:"color:var(--danger,#a33)",hidden:true});
+  const save=h("button",{class:"btn primary",type:"button",text:"Lagre og test"});
+  save.onclick=async()=>{const k=inp.value.trim();if(!k){err.textContent="Lim inn nøkkelen først.";err.hidden=false;return}
+    save.disabled=true;save.textContent="Tester …";err.hidden=true;
+    try{const r=await gbApi("POST","tripletex/key",{key:k});S.txst=r;if(r.ok){closeOv();toast("Koblet til. "+r.apne+" åpne ordre i Tripletex, "+r.nye+" nye hentet.");render()}else{err.textContent=r.feil||"Det virket ikke.";err.hidden=false;save.disabled=false;save.textContent="Lagre og test"}}
+    catch(e){err.textContent="Fikk ikke lagret nøkkelen.";err.hidden=false;save.disabled=false;save.textContent="Lagre og test"}};
+  const off=st.koblet?h("button",{class:"btn ghost",type:"button",text:"Koble fra",onclick:async(e)=>{const b=e.currentTarget;if(!b.dataset.c){b.dataset.c="1";b.textContent="Sikker? Trykk igjen";return}try{S.txst=await gbApi("POST","tripletex/key",{key:""});closeOv();toast("Koblet fra Tripletex");render()}catch(x){toast("Fikk ikke koblet fra")}}}):h("span");
+  sheet(st.koblet?"Tripletex-nøkkel":"Koble til Tripletex",[
+    h("ol",{class:"steps"},
+      h("li",{text:"Gå til API-nøkler i Tripletex og trykk «Opprett nøkkel». Kall den «Arbeidsplan»."}),
+      h("li",{text:"Gi den bare tilgang til å lese ordre og kunder hvis du får velge."}),
+      h("li",{text:"Kopier nøkkelen. Tripletex viser den bare én gang."}),
+      h("li",{text:"Lim den inn her og trykk «Lagre og test»."})),
+    h("div",{class:"f"},h("label",{for:"tx-key",text:"API-nøkkel"}),inp),
+    h("p",{class:"hint",text:"Nøkkelen lagres bare på serveren og vises aldri igjen, verken her eller for de ansatte. Prisene hentes ikke."+(st.koblet?" Limer du inn en ny, erstattes den gamle.":"")}),
+    err,
+    h("div",{class:"acts"},off,h("div",{class:"r"},h("button",{class:"btn ghost",type:"button",text:"Avbryt",onclick:closeOv}),save))]);
+}
 function renderTx(){
-  if(!S.tripletex.length||!S.canWrite)return null;
+  if(!S.canWrite)return null;
+  const bar=txBar();
+  if(!S.tripletex.length)return bar?h("div",{style:"display:flex;flex-direction:column;gap:10px;margin-top:14px"},h("div",{class:"sec-h"},h("h2",{text:"Fra Tripletex"})),bar):null;
   const imp=new Set(S.ordre.map(o=>o.tripletexId).filter(Boolean));
-  const left=S.tripletex.filter(c=>!c.importert&&!imp.has(c.tid));
+  const left=S.tripletex.filter(c=>!c.importert&&!c.lukket&&!imp.has(c.tid));
   const vis=left.filter(c=>S.visSkjulte||!c.skjult).sort((a,b)=>String(b.nr).localeCompare(String(a.nr),"nb",{numeric:true}));
   const hidden=left.filter(c=>c.skjult).length;
   return h("div",{style:"display:flex;flex-direction:column;gap:10px;margin-top:14px"},
     h("div",{class:"sec-h"},h("h2",{text:"Fra Tripletex"}),h("span",{text:vis.length+" åpne ordre ikke tatt inn"})),
+    bar,
     h("p",{class:"hint",style:"margin:0",text:"Ta inn ordrene som skal i produksjon. Da kan du sette dem på de ansatte, og de kan lese ordrelinjene og føre timer på dem. Prisene tas ikke med."}),
     vis.length?h("div",{class:"list"},vis.map(c=>h("div",{class:"txrow"},
-      h("div",{class:"mid"},h("b",null,h("span",{class:"nr",text:c.nr+" "}),c.kunde||""),h("span",{text:[c.ref,firstTitle(c.var)].filter(Boolean).join(" · ")||" "})),
+      h("div",{class:"mid"},h("b",null,h("span",{class:"nr",text:c.nr+" "}),c.kunde||"",c.ny&&Date.now()-c.ny<3*864e5?h("span",{class:"pill",style:"margin-left:6px",text:"ny"}):null),h("span",{text:[c.ref,firstTitle(c.var)].filter(Boolean).join(" · ")||" "})),
       h("div",{class:"txa"},h("button",{class:"btn primary",type:"button",text:"Ta inn",onclick:()=>importTx(c)}),
         h("button",{class:"btn ghost",type:"button",text:c.skjult?"Vis":"Skjul",onclick:async()=>{try{await S.db.doc("tripletex/"+c.id).update({skjult:!c.skjult})}catch(e){toast(writeErr(e))}}}))))):h("p",{class:"hint",style:"margin:0",text:"Alle åpne Tripletex-ordre er tatt inn eller skjult."}),
     hidden?h("button",{class:"btn ghost",type:"button",style:"align-self:flex-start",text:S.visSkjulte?"Skjul de skjulte":"Vis skjulte ("+hidden+")",onclick:()=>{S.visSkjulte=!S.visSkjulte;render()}}):null);
