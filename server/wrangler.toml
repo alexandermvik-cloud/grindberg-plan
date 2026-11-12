@@ -1,0 +1,16 @@
+name = "grindberg-plan"
+main = "src/worker.js"
+compatibility_date = "2025-06-01"
+account_id = "17a69a30976696e3899db182efa8bf2e"
+workers_dev = true
+
+[[d1_databases]]
+binding = "DB"
+database_name = "grindberg-plan"
+database_id = "3f743643-ac36-452d-9504-095939833999"
+
+[ai]
+binding = "AI"
+
+[triggers]
+crons = ["* * * * *"]

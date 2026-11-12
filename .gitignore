@@ -1,0 +1,9 @@
+# Aldri legg kundedata, eksporter eller nøkler i dette repoet – det er offentlig.
+*.sql
+!server/schema.sql
+*.env
+.dev.vars
+node_modules/
+.wrangler/
+server/*.json
+tripletex*.json

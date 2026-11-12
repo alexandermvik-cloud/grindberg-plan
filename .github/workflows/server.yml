@@ -1,0 +1,35 @@
+name: Server (Cloudflare Worker)
+
+# Publiserer serveren når noe i server/ endres på main.
+# Krever repo-hemmeligheten CLOUDFLARE_API_TOKEN (Settings → Secrets and variables → Actions).
+on:
+  push:
+    branches: [main]
+    paths: ["server/**", ".github/workflows/server.yml"]
+  workflow_dispatch:
+
+concurrency:
+  group: server-deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Sjekk syntaks
+        run: |
+          for f in server/src/*.js; do node --check "$f"; done
+      - name: Har vi nøkkel til Cloudflare?
+        id: key
+        env:
+          T: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          if [ -n "$T" ]; then echo "ok=true" >> "$GITHUB_OUTPUT"; else echo "ok=false" >> "$GITHUB_OUTPUT"; echo "::warning::CLOUDFLARE_API_TOKEN mangler – serveren ble ikke publisert."; fi
+      - name: Publiser til Cloudflare
+        if: steps.key.outputs.ok == 'true'
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          workingDirectory: server
+          command: deploy
